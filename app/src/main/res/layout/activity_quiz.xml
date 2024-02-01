@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/correctGuessCounter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="116dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/correctGuessText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Correct guess #"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/word3Button"
+        android:layout_width="136dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="55dp"
+        android:text="_"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/word1Button"
+        app:layout_constraintTop_toBottomOf="@+id/guessedWordText" />
+
+    <Button
+        android:id="@+id/word1Button"
+        android:layout_width="136dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="53dp"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="31dp"
+        android:text="_"
+        app:layout_constraintEnd_toStartOf="@+id/word3Button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guessedWordText" />
+
+    <Button
+        android:id="@+id/word4Button"
+        android:layout_width="136dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="31dp"
+        android:layout_marginEnd="55dp"
+        android:layout_marginBottom="262dp"
+        android:text="_"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/word2Button" />
+
+    <Button
+        android:id="@+id/word2Button"
+        android:layout_width="136dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="53dp"
+        android:layout_marginEnd="31dp"
+        android:layout_marginBottom="262dp"
+        android:text="_ "
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/word4Button"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/guessedWordText"
+        android:layout_width="156dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="127dp"
+        android:layout_marginTop="252dp"
+        android:layout_marginEnd="128dp"
+        android:autoText="false"
+        android:clickable="false"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/numberWordText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="28dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/numberWordText2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="36dp"
+        android:text="Word #"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
