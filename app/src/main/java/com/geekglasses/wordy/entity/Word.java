@@ -3,16 +3,24 @@ package com.geekglasses.wordy.entity;
 import java.util.Objects;
 
 public class Word {
-    private final String writingForm;
-    private final String translation;
+    private int id;
+    private String writingForm;
+    private String translation;
     private int struggle;
     private int freshness;
+
+    public Word() {
+    }
 
     public Word(String writingForm, String translation, int struggle, int freshness) {
         this.writingForm = writingForm;
         this.translation = translation;
         this.struggle = struggle;
         this.freshness = freshness;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getWritingForm() {
@@ -29,6 +37,18 @@ public class Word {
 
     public int getFreshness() {
         return freshness;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setWritingForm(String writingForm) {
+        this.writingForm = writingForm;
+    }
+
+    public void setTranslation(String translation) {
+        this.translation = translation;
     }
 
     public void setStruggle(int struggle) {
