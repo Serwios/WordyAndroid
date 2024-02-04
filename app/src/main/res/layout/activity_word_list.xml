@@ -7,13 +7,15 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/buttonBack"/>
+        android:layout_above="@+id/buttonBack"
+        android:layout_marginBottom="23dp" />
 
     <Button
         android:id="@+id/buttonBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="98dp"
+        android:layout_height="55dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="Back"/>
+        android:layout_marginBottom="23dp"
+        android:text="Back" />
 </RelativeLayout>

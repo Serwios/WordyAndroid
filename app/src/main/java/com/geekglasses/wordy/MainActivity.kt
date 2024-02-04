@@ -51,9 +51,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         saveWordButton.setOnClickListener {
-            wordEditText.text.clear()
-            translationEditText.text.clear()
-
             dbHelper.addOne(
                 Word(
                     wordEditText.text.toString(),
@@ -64,6 +61,8 @@ class MainActivity : AppCompatActivity() {
             )
 
             hideKeyboard()
+            wordEditText.text.clear()
+            translationEditText.text.clear()
         }
 
         quizButton.setOnClickListener {
@@ -86,8 +85,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hideKeyboard() {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(wordEditText.windowToken, 0)
+        (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(wordEditText.windowToken, 0)
     }
 
     private fun showPopupMenu(view: View) {
