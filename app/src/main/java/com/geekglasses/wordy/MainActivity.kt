@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -14,6 +14,7 @@ import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.activity.QuizActivity
+import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.mapper.WordToQuizDataMapper
@@ -25,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var saveWordButton: Button
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
+
+    private var dbHelper = DataBaseHelper(this)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             wordEditText.text.clear()
             translationEditText.text.clear()
 
-            DataBaseHelper(this).addOne(
+            dbHelper.addOne(
                 Word(
                     wordEditText.text.toString(),
                     translationEditText.text.toString(),
@@ -65,20 +68,18 @@ class MainActivity : AppCompatActivity() {
 
         quizButton.setOnClickListener {
             val quizActivity = Intent(this, QuizActivity::class.java)
-            val resolveAllWords = DataBaseHelper(this).resolveAllWords()
+            val resolveAllWords = dbHelper.allWords
 
-            quizActivity.putParcelableArrayListExtra(
-                "quizDataList", WordToQuizDataMapper(
-                    WordProcessor().getProcessedWords(
-                        resolveAllWords,
-                        resolveAllWords.size
-                    )
-                ).mapToQuizData()
-            )
+            val quizDataList = ArrayList<Parcelable>(WordToQuizDataMapper(
+                WordProcessor().getProcessedWords(
+                    resolveAllWords,
+                    resolveAllWords.size
+                )
+            ).mapToQuizData())
 
+            quizActivity.putParcelableArrayListExtra("quizDataList", quizDataList)
             startActivity(quizActivity)
         }
-
         optionsMenu.setOnClickListener {
             showPopupMenu(optionsMenu)
         }
@@ -95,15 +96,20 @@ class MainActivity : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.clear_dictionary -> {
-                    // clear dictionary
+                    dbHelper.clearWordTable()
+                    showToast("Cleared dictionary")
                     true
                 }
+
                 R.id.show_dictionary -> {
-                    showToast("Item 2 selected")
+                    val wordListActivityIntent = Intent(this, WordListActivity::class.java)
+                    val arrayList = ArrayList(dbHelper.allWords)
+                    wordListActivityIntent.putExtra("wordList", arrayList)
+                    startActivity(wordListActivityIntent)
                     true
                 }
+
                 else -> {
-                    showToast("Item 2 selected")
                     false
                 }
             }

@@ -4,7 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 
 data class QuizData(
-    val correctWord: String,
+    val correctWord: String?,
     val correctTranslation: String,
     val options: List<String>
 ) : Parcelable {

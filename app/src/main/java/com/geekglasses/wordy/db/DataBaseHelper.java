@@ -55,7 +55,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public List<Word> resolveAllWords() {
+    public void clearWordTable() {
+        this.getWritableDatabase().delete(WORD_TABLE, null, null);
+        this.getWritableDatabase().close();
+    }
+
+    public List<Word> getAllWords() {
         List<Word> wordList = new ArrayList<>();
         Cursor cursor = this.getWritableDatabase().rawQuery("SELECT * FROM WORD_TABLE", null);
         if (cursor != null) {
@@ -69,7 +74,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 while (cursor.moveToNext()) {
                     if (isColumnIndexesValid(idColumnIndex, writingFormColumnIndex, translationColumnIndex, struggleColumnIndex, freshnessColumnIndex)) {
                         Word word = new Word();
-                        word.setId(cursor.getInt(idColumnIndex));
                         word.setWritingForm(cursor.getString(writingFormColumnIndex));
                         word.setTranslation(cursor.getString(translationColumnIndex));
                         word.setStruggle(cursor.getInt(struggleColumnIndex));

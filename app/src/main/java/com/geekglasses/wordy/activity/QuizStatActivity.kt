@@ -16,7 +16,7 @@ class QuizStatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz_stat)
 
-        val quizStatData = intent.getParcelableExtra<QuizStatData>("quizStatData") as? QuizStatData
+        val quizStatData = intent.getParcelableExtra("quizStatData") as? QuizStatData
 
         okButton = findViewById(R.id.okButton)
         numberOfWords = findViewById(R.id.numberOfWords)
