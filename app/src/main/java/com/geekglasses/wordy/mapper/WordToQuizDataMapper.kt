@@ -23,12 +23,21 @@ class WordToQuizDataMapper(private val words: List<Word>) {
     private fun generateOptions(allTranslations: List<String?>, correctTranslation: String?): List<String> {
         val options = mutableListOf<String>()
         if (correctTranslation != null) {
-            options.add(correctTranslation)
+            val remainingTranslations = allTranslations.filter { it != correctTranslation }.toMutableList()
             while (options.size < 3) {
-                val randomIndex = Random.nextInt(allTranslations.size)
-                val randomTranslation = allTranslations[randomIndex]
-                if (randomTranslation != correctTranslation && !options.contains(randomTranslation)) {
-                    randomTranslation?.let { options.add(it) }
+                if (remainingTranslations.isEmpty()) {
+                    repeat(3 - options.size) {
+                        options.add("-")
+                    }
+                    break
+                }
+                val randomIndex = Random.nextInt(remainingTranslations.size)
+                val randomTranslation = remainingTranslations[randomIndex]
+                if (!options.contains(randomTranslation)) {
+                    randomTranslation?.let {
+                        options.add(it)
+                        remainingTranslations.removeAt(randomIndex)
+                    }
                 }
             }
         }

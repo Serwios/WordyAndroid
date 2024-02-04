@@ -19,6 +19,8 @@ import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.mapper.WordToQuizDataMapper
 import com.geekglasses.wordy.service.WordProcessor
+import com.geekglasses.wordy.validator.WordValidator.isWordExist
+import com.geekglasses.wordy.validator.WordValidator.isWordValid
 
 class MainActivity : AppCompatActivity() {
     private lateinit var wordEditText: EditText
@@ -51,34 +53,46 @@ class MainActivity : AppCompatActivity() {
         }
 
         saveWordButton.setOnClickListener {
-            dbHelper.addOne(
-                Word(
-                    wordEditText.text.toString(),
-                    translationEditText.text.toString(),
-                    Constants.MINIMAL_STRUGGLE,
-                    Constants.MAXIMAL_FRESHNESS
-                )
-            )
+            if (isWordValid(wordEditText.text.toString()) && isWordValid(translationEditText.text.toString())) {
+                if (isWordExist(wordEditText.text.toString(), dbHelper)) {
+                    showToast("Input word already exist")
+                    return@setOnClickListener;
+                }
 
-            hideKeyboard()
-            wordEditText.text.clear()
-            translationEditText.text.clear()
+                dbHelper.addOne(
+                    Word(
+                        wordEditText.text.toString(),
+                        translationEditText.text.toString(),
+                        Constants.MINIMAL_STRUGGLE,
+                        Constants.MAXIMAL_FRESHNESS
+                    )
+                )
+
+                hideKeyboard()
+                wordEditText.text.clear()
+                translationEditText.text.clear()
+            } else {
+                showToast("Input words invalid")
+            }
         }
 
         quizButton.setOnClickListener {
             val quizActivity = Intent(this, QuizActivity::class.java)
             val resolveAllWords = dbHelper.allWords
 
-            val quizDataList = ArrayList<Parcelable>(WordToQuizDataMapper(
-                WordProcessor().getProcessedWords(
-                    resolveAllWords,
-                    resolveAllWords.size
-                )
-            ).mapToQuizData())
+            val quizDataList = ArrayList<Parcelable>(
+                WordToQuizDataMapper(
+                    WordProcessor().getProcessedWords(
+                        resolveAllWords,
+                        resolveAllWords.size
+                    )
+                ).mapToQuizData()
+            )
 
             quizActivity.putParcelableArrayListExtra("quizDataList", quizDataList)
             startActivity(quizActivity)
         }
+
         optionsMenu.setOnClickListener {
             showPopupMenu(optionsMenu)
         }

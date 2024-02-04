@@ -40,7 +40,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     public boolean addOne(Word word) {
         try {
-            SQLiteDatabase db = this.getWritableDatabase();
             ContentValues cv = new ContentValues();
 
             cv.put(COLUMN_WRITING_FORM, word.getWritingForm());
@@ -48,11 +47,18 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             cv.put(COLUMN_STRUGGLE, word.getStruggle());
             cv.put(COLUMN_FRESHNESS, word.getFreshness());
 
-            return db.insert(WORD_TABLE, null, cv) > 0;
+            return this.getWritableDatabase().insert(WORD_TABLE, null, cv) > 0;
         } catch (Exception e) {
             System.out.println("Failed to add data to DB, message: " + e.getMessage());
             return false;
         }
+    }
+
+    public boolean isWordExists(String word) {
+        Cursor cursor = this.getReadableDatabase().rawQuery("SELECT * FROM " + WORD_TABLE + " WHERE " + COLUMN_WRITING_FORM + "=?", new String[]{word});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        return exists;
     }
 
     public void clearWordTable() {
