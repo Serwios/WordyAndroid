@@ -10,7 +10,6 @@ import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.model.WordAdapter
 
 class WordListActivity : AppCompatActivity() {
-
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: WordAdapter
     private var wordList: List<Word> = mutableListOf()

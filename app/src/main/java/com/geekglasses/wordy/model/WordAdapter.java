@@ -13,8 +13,7 @@ import com.geekglasses.wordy.entity.Word;
 import java.util.List;
 
 public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder> {
-
-    private List<Word> wordList;
+    private final List<Word> wordList;
 
     public WordAdapter(List<Word> wordList) {
         this.wordList = wordList;

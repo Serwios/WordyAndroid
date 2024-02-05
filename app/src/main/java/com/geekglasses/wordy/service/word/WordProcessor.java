@@ -1,4 +1,4 @@
-package com.geekglasses.wordy.service;
+package com.geekglasses.wordy.service.word;
 
 import com.geekglasses.wordy.entity.Word;
 

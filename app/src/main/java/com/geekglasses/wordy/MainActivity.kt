@@ -1,8 +1,11 @@
 package com.geekglasses.wordy
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.Menu
@@ -13,14 +16,20 @@ import android.widget.EditText
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.geekglasses.wordy.activity.QuizActivity
 import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.mapper.WordToQuizDataMapper
-import com.geekglasses.wordy.service.WordProcessor
+import com.geekglasses.wordy.service.notification.NotificationScheduler
+import com.geekglasses.wordy.service.word.WordProcessor
 import com.geekglasses.wordy.validator.WordValidator.isWordExist
 import com.geekglasses.wordy.validator.WordValidator.isWordValid
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     private lateinit var wordEditText: EditText
@@ -96,6 +105,16 @@ class MainActivity : AppCompatActivity() {
         optionsMenu.setOnClickListener {
             showPopupMenu(optionsMenu)
         }
+
+        val workRequest = PeriodicWorkRequestBuilder<NotificationScheduler>(
+            1, TimeUnit.DAYS
+        ).build()
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            "QuizNotificationWork",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 
     private fun hideKeyboard() {

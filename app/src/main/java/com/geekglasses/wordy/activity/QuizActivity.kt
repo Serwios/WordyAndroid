@@ -1,5 +1,6 @@
 package com.geekglasses.wordy.activity
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -101,5 +102,11 @@ class QuizActivity : AppCompatActivity() {
 
         currentQuizIndex++
         loadQuiz(currentQuizIndex)
+    }
+
+    companion object {
+        fun createIntent(context: Context): Intent {
+            return Intent(context, QuizActivity::class.java)
+        }
     }
 }
