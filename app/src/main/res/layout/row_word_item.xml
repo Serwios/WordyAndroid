@@ -16,4 +16,18 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/textViewWritingForm"
         android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/textViewStruggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewTranslation"
+        android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/textViewFreshness"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewStruggle"
+        android:textSize="12sp"/>
 </RelativeLayout>

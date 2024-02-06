@@ -3,12 +3,15 @@ package com.geekglasses.wordy.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.R
+import com.geekglasses.wordy.mapper.WordToQuizDataMapper
 import com.geekglasses.wordy.model.QuizData
 import com.geekglasses.wordy.model.QuizStatData
+import com.geekglasses.wordy.service.word.WordProcessor
 
 class QuizActivity : AppCompatActivity() {
     private lateinit var wordCounterText: TextView
@@ -105,8 +108,10 @@ class QuizActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun createIntent(context: Context): Intent {
-            return Intent(context, QuizActivity::class.java)
+        fun createIntent(context: Context, quizDataList: ArrayList<Parcelable>): Intent {
+            val quizActivityIntent = Intent(context, QuizActivity::class.java)
+            quizActivityIntent.putParcelableArrayListExtra("quizDataList", quizDataList)
+            return quizActivityIntent
         }
     }
 }

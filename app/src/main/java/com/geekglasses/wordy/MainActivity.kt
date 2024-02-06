@@ -1,13 +1,9 @@
 package com.geekglasses.wordy
 
 import android.annotation.SuppressLint
-import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.Menu
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -23,12 +19,10 @@ import com.geekglasses.wordy.activity.QuizActivity
 import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
-import com.geekglasses.wordy.mapper.WordToQuizDataMapper
 import com.geekglasses.wordy.service.notification.NotificationScheduler
-import com.geekglasses.wordy.service.word.WordProcessor
+import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
 import com.geekglasses.wordy.validator.WordValidator.isWordExist
 import com.geekglasses.wordy.validator.WordValidator.isWordValid
-import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -86,20 +80,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         quizButton.setOnClickListener {
-            val quizActivity = Intent(this, QuizActivity::class.java)
-            val resolveAllWords = dbHelper.allWords
-
-            val quizDataList = ArrayList<Parcelable>(
-                WordToQuizDataMapper(
-                    WordProcessor().getProcessedWords(
-                        resolveAllWords,
-                        resolveAllWords.size
-                    )
-                ).mapToQuizData()
-            )
-
-            quizActivity.putParcelableArrayListExtra("quizDataList", quizDataList)
-            startActivity(quizActivity)
+            startActivity(QuizActivity.createIntent(this, resolveQuizData(dbHelper)))
         }
 
         optionsMenu.setOnClickListener {
