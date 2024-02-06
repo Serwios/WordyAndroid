@@ -30,4 +30,18 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/textViewStruggle"
         android:textSize="12sp"/>
+
+    <Button
+        android:id="@+id/buttonDeleteEntry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/red_button_background"
+        android:text="X"
+        android:textColor="@android:color/white"
+        android:padding="8dp"
+        android:layout_centerVertical="true"
+        android:onClick="onDeleteButtonClick"
+        android:clickable="true"
+        android:focusable="true" />
 </RelativeLayout>

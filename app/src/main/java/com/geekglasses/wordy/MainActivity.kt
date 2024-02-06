@@ -1,5 +1,6 @@
 package com.geekglasses.wordy
 
+import com.geekglasses.wordy.activity.WordListActivity
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -16,7 +17,6 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.geekglasses.wordy.activity.QuizActivity
-import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.service.notification.NotificationScheduler

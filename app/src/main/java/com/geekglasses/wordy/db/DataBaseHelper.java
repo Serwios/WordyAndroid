@@ -102,4 +102,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 translationColumnIndex != -1 && struggleColumnIndex != -1 &&
                 freshnessColumnIndex != -1;
     }
+
+    public boolean deleteWordByWritingForm(String wordToDelete) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int deletedRows = db.delete(WORD_TABLE, COLUMN_WRITING_FORM + "=?", new String[]{wordToDelete});
+        db.close();
+        return deletedRows > 0;
+    }
 }

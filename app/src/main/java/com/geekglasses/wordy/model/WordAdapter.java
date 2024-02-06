@@ -61,4 +61,10 @@ public class WordAdapter extends RecyclerView.Adapter<WordAdapter.WordViewHolder
             textViewFreshness = itemView.findViewById(R.id.textViewFreshness);
         }
     }
+
+    public void updateList(List<Word> newWordList) {
+        wordList.clear();
+        wordList.addAll(newWordList);
+        notifyDataSetChanged();
+    }
 }
