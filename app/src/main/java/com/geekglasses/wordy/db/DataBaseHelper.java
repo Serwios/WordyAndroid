@@ -109,4 +109,18 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.close();
         return deletedRows > 0;
     }
+
+    public void updateStruggleForWord(String word, int struggleCount) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + WORD_TABLE + " SET " + COLUMN_STRUGGLE + " = " + struggleCount + " WHERE " + COLUMN_WRITING_FORM + " = '" + word + "'";
+        db.execSQL(query);
+        db.close();
+    }
+
+    public void updateFreshnessForWord(String word, int freshnessIncrement) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + WORD_TABLE + " SET " + COLUMN_FRESHNESS + " = " + COLUMN_FRESHNESS + " + " + freshnessIncrement + " WHERE " + COLUMN_WRITING_FORM + " = ?";
+        db.execSQL(query, new String[]{word});
+        db.close();
+    }
 }

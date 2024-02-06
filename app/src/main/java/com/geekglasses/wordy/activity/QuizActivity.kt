@@ -8,12 +8,13 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.R
-import com.geekglasses.wordy.mapper.WordToQuizDataMapper
+import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.model.QuizData
 import com.geekglasses.wordy.model.QuizStatData
-import com.geekglasses.wordy.service.word.WordProcessor
 
 class QuizActivity : AppCompatActivity() {
+    private lateinit var dbHelper: DataBaseHelper
+
     private lateinit var wordCounterText: TextView
     private lateinit var correctGuessCounter: TextView
 
@@ -26,7 +27,7 @@ class QuizActivity : AppCompatActivity() {
     private var currentQuizIndex = 0
     private val totalQuizzes = 3
     private var correctGuesses = 0
-
+    private var struggleCount = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
@@ -53,7 +54,8 @@ class QuizActivity : AppCompatActivity() {
         if (!quizDataList.isNullOrEmpty()) {
             val quizData = quizDataList.removeAt(0)
             val incorrectOptions = quizData?.options.orEmpty()
-            intent.putExtra("correctTranslation", quizData?.correctTranslation)
+            intent.putExtra("currentWord", quizData?.correctWord)
+            intent.putExtra("correctTranslation", quizData?.correctWord)
             setUpOptionsRandomly(
                 quizData?.correctWord.orEmpty(),
                 quizData?.correctTranslation.orEmpty(),
@@ -83,6 +85,7 @@ class QuizActivity : AppCompatActivity() {
             wordCounterText.text = (index + 1).toString()
             startGame(intent.getParcelableArrayListExtra<QuizData>("quizDataList") as? ArrayList<QuizData>)
         } else {
+            updateStruggleInDB()
             val intent = Intent(this, QuizStatActivity::class.java)
             intent.putExtra("quizStatData", QuizStatData(correctGuesses, index))
             startActivity(intent)
@@ -98,13 +101,38 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(selectedOption: String) {
-        if (selectedOption == intent.getStringExtra("correctTranslation")) {
-            correctGuesses += 1
-            correctGuessCounter.text = correctGuesses.toString()
+        val correctWord = intent.getStringExtra("currentWord")
+        val dbHelper = DataBaseHelper(this)
+
+        if (selectedOption != intent.getStringExtra("correctTranslation")) {
+            struggleCount++
+            dbHelper.updateStruggleForWord(correctWord, struggleCount)
         }
 
-        currentQuizIndex++
-        loadQuiz(currentQuizIndex)
+        dbHelper.updateFreshnessForWord(correctWord, -1)
+
+        if (currentQuizIndex < totalQuizzes - 1) {
+            currentQuizIndex++
+            loadQuiz(currentQuizIndex)
+        } else {
+            val intent = Intent(this, QuizStatActivity::class.java)
+            intent.putExtra("quizStatData", QuizStatData(correctGuesses, totalQuizzes))
+            startActivity(intent)
+            finish()
+        }
+    }
+
+    private fun updateStruggleInDB() {
+        val wordToUpdate = intent.getStringExtra("correctTranslation")
+
+        val wordList = dbHelper.allWords
+        val word = wordList.firstOrNull { it.translation == wordToUpdate }
+
+        word?.let {
+            it.struggle = it.struggle + struggleCount
+            dbHelper.deleteWordByWritingForm(wordToUpdate)
+            dbHelper.addOne(it)
+        }
     }
 
     companion object {

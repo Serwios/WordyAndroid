@@ -6,7 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.geekglasses.wordy.service.notification.NotificationScheduler
+import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

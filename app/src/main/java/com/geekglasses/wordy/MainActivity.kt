@@ -19,8 +19,9 @@ import androidx.work.WorkManager
 import com.geekglasses.wordy.activity.QuizActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
-import com.geekglasses.wordy.service.notification.NotificationScheduler
+import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
+import com.geekglasses.wordy.service.scheduler.freshness.FreshnessUpdateCheckScheduler
 import com.geekglasses.wordy.validator.WordValidator.isWordExist
 import com.geekglasses.wordy.validator.WordValidator.isWordValid
 import java.util.concurrent.TimeUnit
@@ -66,8 +67,8 @@ class MainActivity : AppCompatActivity() {
                     Word(
                         wordEditText.text.toString(),
                         translationEditText.text.toString(),
-                        Constants.MINIMAL_STRUGGLE,
-                        Constants.MAXIMAL_FRESHNESS
+                        Constants.INITIAL_STRUGGLE,
+                        Constants.INITIAL_FRESHNESS
                     )
                 )
 
@@ -87,6 +88,16 @@ class MainActivity : AppCompatActivity() {
             showPopupMenu(optionsMenu)
         }
 
+        scheduleQuizRequestNotification()
+        scheduleFreshnessStateUpdate()
+    }
+
+    private fun scheduleFreshnessStateUpdate() {
+        val scheduler = FreshnessUpdateCheckScheduler(this)
+        scheduler.scheduleFreshnessUpdate()
+    }
+
+    private fun scheduleQuizRequestNotification() {
         val workRequest = PeriodicWorkRequestBuilder<NotificationScheduler>(
             1, TimeUnit.DAYS
         ).build()

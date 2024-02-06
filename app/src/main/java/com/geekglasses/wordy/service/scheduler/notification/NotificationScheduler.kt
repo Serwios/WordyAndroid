@@ -1,4 +1,4 @@
-package com.geekglasses.wordy.service.notification
+package com.geekglasses.wordy.service.scheduler.notification
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
