@@ -13,8 +13,6 @@ import com.geekglasses.wordy.model.QuizData
 import com.geekglasses.wordy.model.QuizStatData
 
 class QuizActivity : AppCompatActivity() {
-    private lateinit var dbHelper: DataBaseHelper
-
     private lateinit var wordCounterText: TextView
     private lateinit var correctGuessCounter: TextView
 
@@ -27,7 +25,7 @@ class QuizActivity : AppCompatActivity() {
     private var currentQuizIndex = 0
     private val totalQuizzes = 3
     private var correctGuesses = 0
-    private var struggleCount = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
@@ -83,9 +81,9 @@ class QuizActivity : AppCompatActivity() {
     private fun loadQuiz(index: Int) {
         if (index < totalQuizzes) {
             wordCounterText.text = (index + 1).toString()
+            correctGuessCounter.text = correctGuesses.toString()
             startGame(intent.getParcelableArrayListExtra<QuizData>("quizDataList") as? ArrayList<QuizData>)
         } else {
-            updateStruggleInDB()
             val intent = Intent(this, QuizStatActivity::class.java)
             intent.putExtra("quizStatData", QuizStatData(correctGuesses, index))
             startActivity(intent)
@@ -105,8 +103,10 @@ class QuizActivity : AppCompatActivity() {
         val dbHelper = DataBaseHelper(this)
 
         if (selectedOption != intent.getStringExtra("correctTranslation")) {
-            struggleCount++
-            dbHelper.updateStruggleForWord(correctWord, struggleCount)
+            dbHelper.updateStruggleForWord(correctWord, 1)
+        } else {
+            correctGuesses += 1
+            dbHelper.updateStruggleForWord(correctWord, -1)
         }
 
         dbHelper.updateFreshnessForWord(correctWord, -1)
@@ -119,19 +119,6 @@ class QuizActivity : AppCompatActivity() {
             intent.putExtra("quizStatData", QuizStatData(correctGuesses, totalQuizzes))
             startActivity(intent)
             finish()
-        }
-    }
-
-    private fun updateStruggleInDB() {
-        val wordToUpdate = intent.getStringExtra("correctTranslation")
-
-        val wordList = dbHelper.allWords
-        val word = wordList.firstOrNull { it.translation == wordToUpdate }
-
-        word?.let {
-            it.struggle = it.struggle + struggleCount
-            dbHelper.deleteWordByWritingForm(wordToUpdate)
-            dbHelper.addOne(it)
         }
     }
 
