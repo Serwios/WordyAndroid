@@ -1,11 +1,10 @@
 package com.geekglasses.wordy
 
-import com.geekglasses.wordy.activity.WordListActivity
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -17,11 +16,12 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.geekglasses.wordy.activity.QuizActivity
+import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
-import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
 import com.geekglasses.wordy.service.scheduler.freshness.FreshnessUpdateCheckScheduler
+import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
 import com.geekglasses.wordy.validator.WordValidator.isWordExist
 import com.geekglasses.wordy.validator.WordValidator.isWordValid
 import java.util.concurrent.TimeUnit
@@ -33,48 +33,39 @@ class MainActivity : AppCompatActivity() {
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
 
-    private var dbHelper = DataBaseHelper(this)
+    private val dbHelper by lazy { DataBaseHelper(this) }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        initViews()
+        setupListeners()
+
+        scheduleTasks()
+    }
+
+    private fun initViews() {
         wordEditText = findViewById(R.id.wordEditText)
         translationEditText = findViewById(R.id.translationEditText)
         saveWordButton = findViewById(R.id.saveWordButton)
         quizButton = findViewById(R.id.quizButton)
         optionsMenu = findViewById(R.id.optionsMenu)
+    }
 
-        wordEditText.setOnTouchListener { _, _ ->
-            wordEditText.text.clear()
-            false
-        }
-
-        translationEditText.setOnTouchListener { _, _ ->
-            translationEditText.text.clear()
-            false
-        }
+    private fun setupListeners() {
+        wordEditText.clearOnTouchListener()
+        translationEditText.clearOnTouchListener()
 
         saveWordButton.setOnClickListener {
             if (isWordValid(wordEditText.text.toString()) && isWordValid(translationEditText.text.toString())) {
                 if (isWordExist(wordEditText.text.toString(), dbHelper)) {
-                    showToast("Input word already exist")
-                    return@setOnClickListener;
+                    showToast("Input word already exists")
+                    return@setOnClickListener
                 }
 
-                dbHelper.addOne(
-                    Word(
-                        wordEditText.text.toString(),
-                        translationEditText.text.toString(),
-                        Constants.INITIAL_STRUGGLE,
-                        Constants.INITIAL_FRESHNESS
-                    )
-                )
-
-                hideKeyboard()
-                wordEditText.text.clear()
-                translationEditText.text.clear()
+                saveWord()
+                clearFields()
             } else {
                 showToast("Input words invalid")
             }
@@ -85,16 +76,37 @@ class MainActivity : AppCompatActivity() {
         }
 
         optionsMenu.setOnClickListener {
-            showPopupMenu(optionsMenu)
+            showPopupMenu()
         }
-
-        scheduleQuizRequestNotification()
-        scheduleFreshnessStateUpdate()
     }
 
-    private fun scheduleFreshnessStateUpdate() {
-        val scheduler = FreshnessUpdateCheckScheduler(this)
-        scheduler.scheduleFreshnessUpdate()
+    private fun scheduleTasks() {
+        FreshnessUpdateCheckScheduler(this).scheduleFreshnessUpdate()
+        scheduleQuizRequestNotification()
+    }
+
+    private fun saveWord() {
+        dbHelper.addOne(
+            Word(
+                wordEditText.text.toString(),
+                translationEditText.text.toString(),
+                Constants.INITIAL_STRUGGLE,
+                Constants.INITIAL_FRESHNESS
+            )
+        )
+        hideKeyboard()
+    }
+
+    private fun clearFields() {
+        wordEditText.text.clear()
+        translationEditText.text.clear()
+    }
+
+    private fun View.clearOnTouchListener() {
+        setOnTouchListener(fun(_: View, _: MotionEvent): Boolean {
+            (this as EditText).text.clear()
+            return false
+        })
     }
 
     private fun scheduleQuizRequestNotification() {
@@ -114,8 +126,8 @@ class MainActivity : AppCompatActivity() {
             .hideSoftInputFromWindow(wordEditText.windowToken, 0)
     }
 
-    private fun showPopupMenu(view: View) {
-        val popupMenu = PopupMenu(this, view)
+    private fun showPopupMenu() {
+        val popupMenu = PopupMenu(this, optionsMenu)
         popupMenu.inflate(R.menu.example_menu)
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
@@ -124,18 +136,14 @@ class MainActivity : AppCompatActivity() {
                     showToast("Cleared dictionary")
                     true
                 }
-
                 R.id.show_dictionary -> {
                     val wordListActivityIntent = Intent(this, WordListActivity::class.java)
-                    val arrayList = ArrayList(dbHelper.allWords)
+                    val arrayList = ArrayList(dbHelper.getAllWords())
                     wordListActivityIntent.putExtra("wordList", arrayList)
                     startActivity(wordListActivityIntent)
                     true
                 }
-
-                else -> {
-                    false
-                }
+                else -> false
             }
         }
         popupMenu.show()

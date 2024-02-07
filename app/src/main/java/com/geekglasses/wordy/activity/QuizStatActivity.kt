@@ -16,17 +16,24 @@ class QuizStatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz_stat)
 
-        val quizStatData = intent.getParcelableExtra("quizStatData") as? QuizStatData
+        initViews()
+        displayQuizStat()
+        setButtonClickListeners()
+    }
 
+    private fun initViews() {
         okButton = findViewById(R.id.okButton)
         numberOfWords = findViewById(R.id.numberOfWords)
         numberOfGuessedWords = findViewById(R.id.numberOfGuessedWords)
+    }
 
+    private fun displayQuizStat() {
+        val quizStatData = intent.getParcelableExtra<QuizStatData>("quizStatData")
         numberOfWords.text = "Words #${quizStatData?.numberOfWords}"
         numberOfGuessedWords.text = "Guessed #${quizStatData?.numberOfGuessedWords}"
+    }
 
-        okButton.setOnClickListener {
-            finish()
-        }
+    private fun setButtonClickListeners() {
+        okButton.setOnClickListener { finish() }
     }
 }

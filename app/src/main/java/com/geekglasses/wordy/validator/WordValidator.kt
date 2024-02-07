@@ -8,6 +8,6 @@ object WordValidator {
     }
 
     fun isWordExist(word: String, dbHelper: DataBaseHelper): Boolean {
-        return dbHelper.isWordExists(word);
+        return dbHelper.isWordExists(word)
     }
 }

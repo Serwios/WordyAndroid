@@ -8,9 +8,9 @@ import com.geekglasses.wordy.db.DataBaseHelper
 class FreshnessUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val dbHelper = DataBaseHelper(context)
-        val wordList = dbHelper.allWords
+        val wordList = dbHelper.getAllWords()
         for (word in wordList) {
-            dbHelper.updateFreshnessForWord(word.writingForm, -1)
+            word.writingForm?.let { dbHelper.updateFreshnessForWord(it, -1) }
         }
     }
 }

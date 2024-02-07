@@ -15,13 +15,8 @@ import com.geekglasses.wordy.model.QuizStatData
 class QuizActivity : AppCompatActivity() {
     private lateinit var wordCounterText: TextView
     private lateinit var correctGuessCounter: TextView
-
     private lateinit var guessedWordText: TextView
-    private lateinit var word1Button: Button
-    private lateinit var word2Button: Button
-    private lateinit var word3Button: Button
-    private lateinit var word4Button: Button
-
+    private lateinit var wordButtons: List<Button>
     private var currentQuizIndex = 0
     private val totalQuizzes = 3
     private var correctGuesses = 0
@@ -30,103 +25,98 @@ class QuizActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
 
-        wordCounterText = findViewById(R.id.numberWordText)
-        correctGuessCounter = findViewById(R.id.correctGuessCounter)
-
-        guessedWordText = findViewById(R.id.guessedWordText)
-        word1Button = findViewById(R.id.word1Button)
-        word2Button = findViewById(R.id.word2Button)
-        word3Button = findViewById(R.id.word3Button)
-        word4Button = findViewById(R.id.word4Button)
-
-        wordCounterText.text = (currentQuizIndex + 1).toString()
-        correctGuessCounter.text = "0"
-
-        val parcelableExtra = intent.getParcelableArrayListExtra<QuizData>("quizDataList")
-        val quizDataList = parcelableExtra as? ArrayList<QuizData>
+        initViews()
+        setUpInitialTexts()
         setUpButtonClickListeners()
-        startGame(quizDataList)
+
+        startGame(intent.getParcelableArrayListExtra("quizDataList"))
+    }
+
+    private fun initViews() {
+        with(findViewById<TextView>(R.id.numberWordText)) { wordCounterText = this }
+        with(findViewById<TextView>(R.id.correctGuessCounter)) { correctGuessCounter = this }
+        with(findViewById<TextView>(R.id.guessedWordText)) { guessedWordText = this }
+        wordButtons = listOf(
+            findViewById(R.id.word1Button),
+            findViewById(R.id.word2Button),
+            findViewById(R.id.word3Button),
+            findViewById(R.id.word4Button)
+        )
+    }
+
+    private fun setUpInitialTexts() {
+        wordCounterText.text = "${currentQuizIndex + 1}"
+        correctGuessCounter.text = "0"
     }
 
     private fun startGame(quizDataList: ArrayList<QuizData>?) {
-        if (!quizDataList.isNullOrEmpty()) {
-            val quizData = quizDataList.removeAt(0)
-            val incorrectOptions = quizData?.options.orEmpty()
-            intent.putExtra("currentWord", quizData?.correctWord)
-            intent.putExtra("correctTranslation", quizData?.correctWord)
+        quizDataList?.takeIf { it.isNotEmpty() }?.let { quizData ->
+            val data = quizData.removeAt(0)
+            with(intent) {
+                putExtra("currentWord", data?.correctWord)
+                putExtra("correctTranslation", data?.correctWord)
+                putParcelableArrayListExtra("quizDataList", quizData)
+            }
             setUpOptionsRandomly(
-                quizData?.correctWord.orEmpty(),
-                quizData?.correctTranslation.orEmpty(),
-                incorrectOptions.getOrNull(0).orEmpty(),
-                incorrectOptions.getOrNull(1).orEmpty(),
-                incorrectOptions.getOrNull(2).orEmpty()
+                data?.correctWord.orEmpty(),
+                data?.correctTranslation.orEmpty(),
+                data?.options.orEmpty().take(3)
             )
-
-            intent.putParcelableArrayListExtra("quizDataList", quizDataList)
         }
     }
 
-    private fun setUpOptionsRandomly(wordToGuess: String, correctTranslation: String, incorrectOptionWord1: String, incorrectOptionWord2: String, incorrectOptionWord3: String) {
-        val options = listOf(correctTranslation, incorrectOptionWord1, incorrectOptionWord2, incorrectOptionWord3)
-        val shuffledOptions = options.shuffled()
-
-        guessedWordText.text = wordToGuess;
-
-        word1Button.text = shuffledOptions[0]
-        word2Button.text = shuffledOptions[1]
-        word3Button.text = shuffledOptions[2]
-        word4Button.text = shuffledOptions[3]
+    private fun setUpOptionsRandomly(
+        wordToGuess: String,
+        correctTranslation: String,
+        incorrectOptions: List<String>
+    ) {
+        val options = (incorrectOptions + correctTranslation).shuffled()
+        guessedWordText.text = wordToGuess
+        wordButtons.forEachIndexed { index, button -> button.text = options[index] }
     }
 
     private fun loadQuiz(index: Int) {
         if (index < totalQuizzes) {
-            wordCounterText.text = (index + 1).toString()
+            wordCounterText.text = "${index + 1}"
             correctGuessCounter.text = correctGuesses.toString()
-            startGame(intent.getParcelableArrayListExtra<QuizData>("quizDataList") as? ArrayList<QuizData>)
+            startGame(intent.getParcelableArrayListExtra("quizDataList"))
         } else {
-            val intent = Intent(this, QuizStatActivity::class.java)
-            intent.putExtra("quizStatData", QuizStatData(correctGuesses, index))
-            startActivity(intent)
+            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes))
             finish()
         }
     }
 
     private fun setUpButtonClickListeners() {
-        word1Button.setOnClickListener { checkAnswer(word1Button.text.toString()) }
-        word2Button.setOnClickListener { checkAnswer(word2Button.text.toString()) }
-        word3Button.setOnClickListener { checkAnswer(word3Button.text.toString()) }
-        word4Button.setOnClickListener { checkAnswer(word4Button.text.toString()) }
+        wordButtons.forEach { button ->
+            button.setOnClickListener { checkAnswer(button.text.toString()) }
+        }
     }
 
     private fun checkAnswer(selectedOption: String) {
         val correctWord = intent.getStringExtra("currentWord")
         val dbHelper = DataBaseHelper(this)
+        val struggleValue = if (selectedOption != intent.getStringExtra("correctTranslation")) 1 else -1
 
-        if (selectedOption != intent.getStringExtra("correctTranslation")) {
-            dbHelper.updateStruggleForWord(correctWord, 1)
-        } else {
-            correctGuesses += 1
-            dbHelper.updateStruggleForWord(correctWord, -1)
-        }
+        correctGuesses += (-1 * struggleValue)
+        correctWord?.let { dbHelper.updateStruggleForWord(it, struggleValue) }
+        correctWord?.let { dbHelper.updateFreshnessForWord(it, 1) }
 
-        dbHelper.updateFreshnessForWord(correctWord, -1)
-
-        if (currentQuizIndex < totalQuizzes - 1) {
-            currentQuizIndex++
-            loadQuiz(currentQuizIndex)
-        } else {
-            val intent = Intent(this, QuizStatActivity::class.java)
-            intent.putExtra("quizStatData", QuizStatData(correctGuesses, totalQuizzes))
-            startActivity(intent)
+        if (++currentQuizIndex < totalQuizzes) loadQuiz(currentQuizIndex)
+        else {
+            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes))
             finish()
         }
     }
 
-    companion object {
-        fun createIntent(context: Context, quizDataList: ArrayList<Parcelable>): Intent {
-            val quizActivityIntent = Intent(context, QuizActivity::class.java)
-            quizActivityIntent.putParcelableArrayListExtra("quizDataList", quizDataList)
-            return quizActivityIntent
+    private fun createQuizStatIntent(correctGuesses: Int, totalQuizzes: Int): Intent =
+        Intent(this, QuizStatActivity::class.java).apply {
+            putExtra("quizStatData", QuizStatData(correctGuesses, totalQuizzes))
         }
+
+    companion object {
+        fun createIntent(context: Context, quizDataList: ArrayList<Parcelable>): Intent =
+            Intent(context, QuizActivity::class.java).apply {
+                putParcelableArrayListExtra("quizDataList", quizDataList)
+            }
     }
 }

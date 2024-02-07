@@ -5,11 +5,11 @@ import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.mapper.WordToQuizDataMapper
 import com.geekglasses.wordy.service.word.WordProcessor
 
-class QuizDataResolver() {
+class QuizDataResolver {
     companion object {
         fun resolveQuizData(dbHelper: DataBaseHelper): ArrayList<Parcelable> {
-            val allWords = dbHelper.allWords
-            return ArrayList<Parcelable>(
+            val allWords = dbHelper.getAllWords()
+            return ArrayList(
                 WordToQuizDataMapper(
                     WordProcessor().getProcessedWords(
                         allWords,

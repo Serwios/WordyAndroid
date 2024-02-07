@@ -24,20 +24,25 @@ class WordListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_word_list)
 
+        initViews()
+        setUpRecyclerView()
+        setUpButtonBack()
+    }
+
+    private fun initViews() {
         recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
         dbHelper = DataBaseHelper(this)
-
         wordList = intent.getParcelableArrayListExtra("wordList") ?: emptyList()
+    }
 
-        adapter = WordAdapter(wordList)
+    private fun setUpRecyclerView() {
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = WordAdapter(wordList.toMutableList())
         recyclerView.adapter = adapter
+    }
 
-        val buttonBack: Button = findViewById(R.id.buttonBack)
-        buttonBack.setOnClickListener {
-            finish()
-        }
+    private fun setUpButtonBack() {
+        findViewById<Button>(R.id.buttonBack).setOnClickListener { finish() }
     }
 
     fun onDeleteButtonClick(view: View) {
@@ -49,8 +54,7 @@ class WordListActivity : AppCompatActivity() {
             Toast.makeText(this, "Successfully deleted", Toast.LENGTH_SHORT).show()
         }
 
-        wordList = dbHelper.allWords
+        wordList = dbHelper.getAllWords()
         adapter.updateList(wordList)
     }
 }
-
