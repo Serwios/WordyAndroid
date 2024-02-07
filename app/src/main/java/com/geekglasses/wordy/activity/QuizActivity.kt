@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.model.QuizData
-import com.geekglasses.wordy.model.QuizStatData
+import com.geekglasses.wordy.model.QuizResultingData
 
 class QuizActivity : AppCompatActivity() {
     private lateinit var wordCounterText: TextView
@@ -20,6 +20,8 @@ class QuizActivity : AppCompatActivity() {
     private var currentQuizIndex = 0
     private val totalQuizzes = 3
     private var correctGuesses = 0
+    private var quizStartTime = 0L
+    private var quizEndTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +30,9 @@ class QuizActivity : AppCompatActivity() {
         initViews()
         setUpInitialTexts()
         setUpButtonClickListeners()
+
+        // Start tracking quiz start time
+        quizStartTime = System.currentTimeMillis()
 
         startGame(intent.getParcelableArrayListExtra("quizDataList"))
     }
@@ -81,7 +86,10 @@ class QuizActivity : AppCompatActivity() {
             correctGuessCounter.text = correctGuesses.toString()
             startGame(intent.getParcelableArrayListExtra("quizDataList"))
         } else {
-            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes))
+            // Stop tracking quiz end time
+            quizEndTime = System.currentTimeMillis()
+            val timeSpentOnQuiz = quizEndTime - quizStartTime
+            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes, timeSpentOnQuiz))
             finish()
         }
     }
@@ -103,14 +111,16 @@ class QuizActivity : AppCompatActivity() {
 
         if (++currentQuizIndex < totalQuizzes) loadQuiz(currentQuizIndex)
         else {
-            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes))
+            quizEndTime = System.currentTimeMillis()
+            val timeSpentOnQuiz = quizEndTime - quizStartTime
+            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes, timeSpentOnQuiz))
             finish()
         }
     }
 
-    private fun createQuizStatIntent(correctGuesses: Int, totalQuizzes: Int): Intent =
+    private fun createQuizStatIntent(correctGuesses: Int, totalQuizzes: Int, timeSpentOnQuiz: Long): Intent =
         Intent(this, QuizStatActivity::class.java).apply {
-            putExtra("quizStatData", QuizStatData(correctGuesses, totalQuizzes))
+            putExtra("quizStatData", QuizResultingData(correctGuesses, totalQuizzes, timeSpentOnQuiz))
         }
 
     companion object {

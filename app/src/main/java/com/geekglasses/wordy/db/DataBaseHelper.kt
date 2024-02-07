@@ -79,6 +79,25 @@ class DataBaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         return wordList
     }
 
+    fun getMostStruggledWord(): String? {
+        var mostStruggledWord: String? = null
+
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT $COLUMN_WRITING_FORM, MAX($COLUMN_STRUGGLE) FROM $WORD_TABLE", null)
+
+        cursor.use {
+            if (it.moveToFirst()) {
+                val writingFormIndex = it.getColumnIndex(COLUMN_WRITING_FORM)
+                if (writingFormIndex != -1) {
+                    mostStruggledWord = it.getString(writingFormIndex)
+                }
+            }
+        }
+
+        cursor.close()
+        return mostStruggledWord
+    }
+
     fun deleteWordByWritingForm(wordToDelete: String): Boolean {
         val deletedRows = writableDatabase.delete(WORD_TABLE, "$COLUMN_WRITING_FORM=?", arrayOf(wordToDelete))
         return deletedRows > 0
