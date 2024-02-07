@@ -33,6 +33,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
 
+    companion object {
+        const val INITIAL_STRUGGLE = 0;
+        const val INITIAL_FRESHNESS = 0;
+    }
+
     private val dbHelper by lazy { DataBaseHelper(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,8 +95,8 @@ class MainActivity : AppCompatActivity() {
             Word(
                 wordEditText.text.toString(),
                 translationEditText.text.toString(),
-                Constants.INITIAL_STRUGGLE,
-                Constants.INITIAL_FRESHNESS
+                INITIAL_STRUGGLE,
+                INITIAL_FRESHNESS
             )
         )
         hideKeyboard()
