@@ -8,13 +8,13 @@
 
     <TextView
         android:id="@+id/dictionary_size"
-        android:layout_width="186dp"
-        android:layout_height="29dp"
+        android:layout_width="185dp"
+        android:layout_height="19dp"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginBottom="40dp"
         android:text="Dictionary size:"
         android:textColorHint="#7A7A7A"
-        android:textSize="20dp"
+        android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
