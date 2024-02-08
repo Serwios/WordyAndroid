@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.model.QuizData
-import com.geekglasses.wordy.model.QuizResultingData
 import kotlin.properties.Delegates
 
 class QuizActivity : AppCompatActivity() {
@@ -37,7 +36,7 @@ class QuizActivity : AppCompatActivity() {
         quizStartTime = System.currentTimeMillis()
         totalQuizzes = intent.getIntExtra(TOTAL_QUIZZES_EXTRA, TOTAL_QUIZZES_DEFAULT_SIZE)
 
-        startGame(intent.getParcelableArrayListExtra("quizDataList"))
+        startGame(intent.getParcelableArrayListExtra(QUIZ_DATA_LIST_EXTRA))
     }
 
     private fun initViews() {
@@ -61,14 +60,14 @@ class QuizActivity : AppCompatActivity() {
         quizDataList?.takeIf { it.isNotEmpty() }?.let { quizData ->
             val data = quizData.removeAt(0)
             with(intent) {
-                putExtra("currentWord", data?.correctWord)
-                putExtra("correctTranslation", data?.correctTranslation)
-                putParcelableArrayListExtra("quizDataList", quizData)
+                putExtra(CURRENT_WORD, data?.correctWord)
+                putExtra(CORRECT_TRANSLATION, data?.correctTranslation)
+                putParcelableArrayListExtra(QUIZ_DATA_LIST_EXTRA, quizData)
             }
             setUpOptionsRandomly(
-                data?.correctWord.orEmpty(),
-                data?.correctTranslation.orEmpty(),
-                data?.options.orEmpty().take(3)
+                data.correctWord.orEmpty(),
+                data.correctTranslation,
+                data.options.take(3)
             )
         }
     }
@@ -88,11 +87,18 @@ class QuizActivity : AppCompatActivity() {
         if (index < totalQuizzes) {
             wordCounterText.text = "${index + 1}"
             correctGuessCounter.text = correctGuesses.toString()
-            startGame(intent.getParcelableArrayListExtra("quizDataList"))
+            startGame(intent.getParcelableArrayListExtra(QUIZ_DATA_LIST_EXTRA))
         } else {
             quizEndTime = System.currentTimeMillis()
             val timeSpentOnQuiz = quizEndTime - quizStartTime
-            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes, timeSpentOnQuiz))
+            startActivity(
+                QuizStatActivity.createIntent(
+                    this,
+                    correctGuesses,
+                    totalQuizzes,
+                    timeSpentOnQuiz
+                )
+            )
             finish()
         }
     }
@@ -104,13 +110,13 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(selectedOption: String) {
-        val isCorrect = selectedOption == intent.getStringExtra("correctTranslation")
+        val isCorrect = selectedOption == intent.getStringExtra(CORRECT_TRANSLATION)
 
         if (isCorrect) {
             correctGuesses++
         }
 
-        intent.getStringExtra("currentWord")?.let {
+        intent.getStringExtra(CURRENT_WORD)?.let {
             DataBaseHelper(this).updateStruggleForWord(it, if (isCorrect) -1 else 1)
             DataBaseHelper(this).updateFreshnessForWord(it, 1)
         }
@@ -120,25 +126,32 @@ class QuizActivity : AppCompatActivity() {
         } else {
             quizEndTime = System.currentTimeMillis()
             val timeSpentOnQuiz = quizEndTime - quizStartTime
-            startActivity(createQuizStatIntent(correctGuesses, totalQuizzes, timeSpentOnQuiz))
+            startActivity(
+                QuizStatActivity.createIntent(
+                    this,
+                    correctGuesses,
+                    totalQuizzes,
+                    timeSpentOnQuiz
+                )
+            )
             finish()
-        }
-    }
-
-
-    private fun createQuizStatIntent(correctGuesses: Int, totalQuizzes: Int, timeSpentOnQuiz: Long): Intent {
-        val QUIZ_STAT_DATA_EXTRA = "quizStatData"
-        return Intent(this, QuizStatActivity::class.java).apply {
-            putExtra(QUIZ_STAT_DATA_EXTRA, QuizResultingData(correctGuesses, totalQuizzes, timeSpentOnQuiz))
         }
     }
 
     companion object {
         val QUIZ_DATA_LIST_EXTRA = "quizDataList"
+
         val TOTAL_QUIZZES_EXTRA = "totalQuizzes"
         val TOTAL_QUIZZES_DEFAULT_SIZE = 3
 
-        fun createIntent(context: Context, quizDataList: ArrayList<Parcelable>, totalQuizzes: Int): Intent {
+        val CURRENT_WORD = "currentWord"
+        val CORRECT_TRANSLATION = "correctTranslation"
+
+        fun createIntent(
+            context: Context,
+            quizDataList: ArrayList<Parcelable>,
+            totalQuizzes: Int
+        ): Intent {
             return Intent(context, QuizActivity::class.java).apply {
                 putParcelableArrayListExtra(QUIZ_DATA_LIST_EXTRA, quizDataList)
                 putExtra(TOTAL_QUIZZES_EXTRA, totalQuizzes)

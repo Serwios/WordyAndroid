@@ -178,10 +178,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.show_dictionary -> {
-                    val wordListActivityIntent = Intent(this, WordListActivity::class.java)
-                    val arrayList = ArrayList(dbHelper.getAllWords())
-                    wordListActivityIntent.putExtra("wordList", arrayList)
-                    startActivity(wordListActivityIntent)
+                    startActivity(WordListActivity.createIntent(this, ArrayList(dbHelper.getAllWords())))
                     true
                 }
 

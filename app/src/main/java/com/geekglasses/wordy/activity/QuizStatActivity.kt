@@ -1,5 +1,7 @@
 package com.geekglasses.wordy.activity
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -33,7 +35,7 @@ class QuizStatActivity : AppCompatActivity() {
     }
 
     private fun displayQuizStat() {
-        val quizResultingData = intent.getParcelableExtra<QuizResultingData>("quizStatData")
+        val quizResultingData = intent.getParcelableExtra<QuizResultingData>(QUIZ_STAT_DATA_EXTRA)
         numberOfWords.text = "Words #${quizResultingData?.numberOfWords}"
         numberOfGuessedWords.text = "Guessed #${quizResultingData?.numberOfGuessedWords}"
         val timeSpentInMillis = quizResultingData?.timeSpentOnQuiz ?: 0L
@@ -53,5 +55,23 @@ class QuizStatActivity : AppCompatActivity() {
 
     private fun setButtonClickListeners() {
         okButton.setOnClickListener { finish() }
+    }
+
+    companion object {
+        val QUIZ_STAT_DATA_EXTRA = "quizStatData"
+
+        fun createIntent(
+            context: Context,
+            correctGuesses: Int,
+            totalQuizzes: Int,
+            timeSpentOnQuiz: Long
+        ): Intent {
+            return Intent(context, QuizStatActivity::class.java).apply {
+                putExtra(
+                    QUIZ_STAT_DATA_EXTRA,
+                    QuizResultingData(correctGuesses, totalQuizzes, timeSpentOnQuiz)
+                )
+            }
+        }
     }
 }

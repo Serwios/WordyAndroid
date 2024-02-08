@@ -1,5 +1,6 @@
 package com.geekglasses.wordy.activity
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -34,7 +35,7 @@ class WordListActivity : AppCompatActivity() {
     private fun initViews() {
         recyclerView = findViewById(R.id.recyclerView)
         dbHelper = DataBaseHelper(this)
-        wordList = intent.getParcelableArrayListExtra("wordList") ?: emptyList()
+        wordList = intent.getParcelableArrayListExtra(WORD_LIST_EXTRA) ?: emptyList()
     }
 
     private fun setUpRecyclerView() {
@@ -51,6 +52,7 @@ class WordListActivity : AppCompatActivity() {
             finish()
         }
     }
+
     fun onDeleteButtonClick(view: View) {
         val parentLayout = view.parent as RelativeLayout
         val textViewWritingForm = parentLayout.findViewById<TextView>(R.id.textViewWritingForm)
@@ -62,5 +64,18 @@ class WordListActivity : AppCompatActivity() {
 
         wordList = dbHelper.getAllWords()
         adapter.updateList(wordList)
+    }
+
+    companion object {
+        val WORD_LIST_EXTRA = "wordList"
+
+        fun createIntent(
+            context: Context,
+            words: ArrayList<Word>
+        ): Intent {
+            return Intent(context, WordListActivity::class.java).apply {
+                putExtra(WORD_LIST_EXTRA, words)
+            }
+        }
     }
 }
