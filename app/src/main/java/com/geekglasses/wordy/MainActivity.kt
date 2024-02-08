@@ -153,8 +153,19 @@ class MainActivity : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.clear_dictionary -> {
-                    dbHelper.clearWordTable()
-                    showToast("Cleared dictionary")
+                    val alertDialogBuilder = AlertDialog.Builder(this)
+                    alertDialogBuilder.setMessage("Are you sure you want to clear the dictionary?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes") { _, _ ->
+                            dbHelper.clearWordTable()
+                            showToast("Cleared dictionary")
+                        }
+                        .setNegativeButton("No") { dialog, _ ->
+                            dialog.cancel()
+                        }
+
+                    val alertDialog = alertDialogBuilder.create()
+                    alertDialog.show()
                     true
                 }
 
