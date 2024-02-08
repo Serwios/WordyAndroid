@@ -32,7 +32,7 @@ class NotificationScheduler(context: Context, workerParams: WorkerParameters, pr
         val notificationId = 1
 
         val intent = QuizActivity.createIntent(applicationContext,
-            QuizDataResolver.resolveQuizData(dbHelper)
+            QuizDataResolver.resolveQuizData(dbHelper), 3
         )
 
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

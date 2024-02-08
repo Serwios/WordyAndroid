@@ -3,6 +3,7 @@ package com.geekglasses.wordy
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
@@ -11,11 +12,13 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.geekglasses.wordy.activity.QuizActivity
+import com.geekglasses.wordy.activity.QuizActivity.Companion.TOTAL_QUIZZES_DEFAULT_SIZE
 import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
@@ -76,12 +79,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        quizButton.setOnClickListener {
-            startActivity(QuizActivity.createIntent(this, resolveQuizData(dbHelper)))
-        }
-
         optionsMenu.setOnClickListener {
             showPopupMenu()
+        }
+
+        quizButton.setOnClickListener {
+            val quizSize = getSharedPreferences("user_pref", Context.MODE_PRIVATE)
+                .getInt("quizSize", TOTAL_QUIZZES_DEFAULT_SIZE)
+
+            val numberOfWordsInDb = dbHelper.getAllWords().size
+
+            if (quizSize > numberOfWordsInDb) {
+                showToast("There are not enough words for a quiz of size $quizSize")
+            } else {
+                startActivity(
+                    QuizActivity.createIntent(
+                        this, resolveQuizData(dbHelper), quizSize
+                    )
+                )
+            }
         }
     }
 
@@ -141,6 +157,7 @@ class MainActivity : AppCompatActivity() {
                     showToast("Cleared dictionary")
                     true
                 }
+
                 R.id.show_dictionary -> {
                     val wordListActivityIntent = Intent(this, WordListActivity::class.java)
                     val arrayList = ArrayList(dbHelper.getAllWords())
@@ -148,6 +165,12 @@ class MainActivity : AppCompatActivity() {
                     startActivity(wordListActivityIntent)
                     true
                 }
+
+                R.id.set_quiz_size -> {
+                    showSetQuizSizeDialog()
+                    true
+                }
+
                 else -> false
             }
         }
@@ -157,6 +180,49 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.example_menu, menu)
         return true
+    }
+
+    private fun showSetQuizSizeDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Set Quiz Size")
+
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        builder.setView(input)
+
+        builder.setPositiveButton("OK") { dialog, _ ->
+            val inputValue = input.text.toString()
+            if (inputValue.isNotEmpty()) {
+                val quizSize = inputValue.toInt()
+                if (quizSize > 0) {
+                    if (quizSize > dbHelper.getAllWords().size) {
+                        showToast("There are not enough words for a quiz of size $quizSize")
+                        showSetQuizSizeDialog()
+                        return@setPositiveButton
+                    }
+
+                    getSharedPreferences("user_pref", Context.MODE_PRIVATE)
+                        .edit()
+                        .putInt("quizSize", quizSize)
+                        .apply()
+                } else {
+                    showToast("Please, enter a valid size")
+                    showSetQuizSizeDialog()
+                    return@setPositiveButton
+                }
+            } else {
+                showToast("Please, enter a valid size")
+                showSetQuizSizeDialog()
+                return@setPositiveButton
+            }
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
     }
 
     private fun showToast(message: String) {

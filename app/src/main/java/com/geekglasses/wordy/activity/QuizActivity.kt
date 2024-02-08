@@ -11,6 +11,7 @@ import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.model.QuizData
 import com.geekglasses.wordy.model.QuizResultingData
+import kotlin.properties.Delegates
 
 class QuizActivity : AppCompatActivity() {
     private lateinit var wordCounterText: TextView
@@ -18,7 +19,9 @@ class QuizActivity : AppCompatActivity() {
     private lateinit var guessedWordText: TextView
     private lateinit var wordButtons: List<Button>
     private var currentQuizIndex = 0
-    private val totalQuizzes = 3
+
+    private var totalQuizzes by Delegates.notNull<Int>()
+
     private var correctGuesses = 0
     private var quizStartTime = 0L
     private var quizEndTime = 0L
@@ -32,6 +35,7 @@ class QuizActivity : AppCompatActivity() {
         setUpButtonClickListeners()
 
         quizStartTime = System.currentTimeMillis()
+        totalQuizzes = intent.getIntExtra(TOTAL_QUIZZES_EXTRA, TOTAL_QUIZZES_DEFAULT_SIZE)
 
         startGame(intent.getParcelableArrayListExtra("quizDataList"))
     }
@@ -74,6 +78,7 @@ class QuizActivity : AppCompatActivity() {
         correctTranslation: String,
         incorrectOptions: List<String>
     ) {
+        println()
         val options = (incorrectOptions + correctTranslation).shuffled()
         guessedWordText.text = wordToGuess
         wordButtons.forEachIndexed { index, button -> button.text = options[index] }
@@ -121,15 +126,23 @@ class QuizActivity : AppCompatActivity() {
     }
 
 
-    private fun createQuizStatIntent(correctGuesses: Int, totalQuizzes: Int, timeSpentOnQuiz: Long): Intent =
-        Intent(this, QuizStatActivity::class.java).apply {
-            putExtra("quizStatData", QuizResultingData(correctGuesses, totalQuizzes, timeSpentOnQuiz))
+    private fun createQuizStatIntent(correctGuesses: Int, totalQuizzes: Int, timeSpentOnQuiz: Long): Intent {
+        val QUIZ_STAT_DATA_EXTRA = "quizStatData"
+        return Intent(this, QuizStatActivity::class.java).apply {
+            putExtra(QUIZ_STAT_DATA_EXTRA, QuizResultingData(correctGuesses, totalQuizzes, timeSpentOnQuiz))
         }
+    }
 
     companion object {
-        fun createIntent(context: Context, quizDataList: ArrayList<Parcelable>): Intent =
-            Intent(context, QuizActivity::class.java).apply {
-                putParcelableArrayListExtra("quizDataList", quizDataList)
+        val QUIZ_DATA_LIST_EXTRA = "quizDataList"
+        val TOTAL_QUIZZES_EXTRA = "totalQuizzes"
+        val TOTAL_QUIZZES_DEFAULT_SIZE = 3
+
+        fun createIntent(context: Context, quizDataList: ArrayList<Parcelable>, totalQuizzes: Int): Intent {
+            return Intent(context, QuizActivity::class.java).apply {
+                putParcelableArrayListExtra(QUIZ_DATA_LIST_EXTRA, quizDataList)
+                putExtra(TOTAL_QUIZZES_EXTRA, totalQuizzes)
             }
+        }
     }
 }

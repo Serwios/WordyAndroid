@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/menu"
+        android:id="@+id/menu_dictionary"
         android:icon="@drawable/ic_icon"
         android:title="Dictionary">
         <menu
@@ -14,31 +14,16 @@
                 android:title="Show" />
         </menu>
     </item>
-<!--    <item-->
-<!--        android:id="@+id/menu_second"-->
-<!--        android:icon="@drawable/ic_icon"-->
-<!--        android:title="Main">-->
-<!--        <menu-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content">-->
-<!--            <item-->
-<!--                android:id="@+id/item1"-->
-<!--                android:title="Item 1" />-->
-<!--            <item-->
-<!--                android:id="@+id/item2"-->
-<!--                android:title="Item 2" />-->
-<!--            <item-->
-<!--                android:id="@+id/item3"-->
-<!--                android:title="Item 3">-->
-<!--                <menu>-->
-<!--                    <item-->
-<!--                        android:id="@+id/subitem1"-->
-<!--                        android:title="Sub Item 1" />-->
-<!--                    <item-->
-<!--                        android:id="@+id/subitem2"-->
-<!--                        android:title="Sub Item 2" />-->
-<!--                </menu>-->
-<!--            </item>-->
-<!--        </menu>-->
-<!--    </item>-->
+    <item
+        android:id="@+id/menu_quiz"
+        android:icon="@drawable/ic_icon"
+        android:title="Quiz">
+        <menu
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <item
+                android:id="@+id/set_quiz_size"
+                android:title="Size" />
+        </menu>
+    </item>
 </menu>
