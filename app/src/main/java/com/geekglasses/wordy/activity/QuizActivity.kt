@@ -31,7 +31,6 @@ class QuizActivity : AppCompatActivity() {
         setUpInitialTexts()
         setUpButtonClickListeners()
 
-        // Start tracking quiz start time
         quizStartTime = System.currentTimeMillis()
 
         startGame(intent.getParcelableArrayListExtra("quizDataList"))
@@ -59,7 +58,7 @@ class QuizActivity : AppCompatActivity() {
             val data = quizData.removeAt(0)
             with(intent) {
                 putExtra("currentWord", data?.correctWord)
-                putExtra("correctTranslation", data?.correctWord)
+                putExtra("correctTranslation", data?.correctTranslation)
                 putParcelableArrayListExtra("quizDataList", quizData)
             }
             setUpOptionsRandomly(
@@ -86,7 +85,6 @@ class QuizActivity : AppCompatActivity() {
             correctGuessCounter.text = correctGuesses.toString()
             startGame(intent.getParcelableArrayListExtra("quizDataList"))
         } else {
-            // Stop tracking quiz end time
             quizEndTime = System.currentTimeMillis()
             val timeSpentOnQuiz = quizEndTime - quizStartTime
             startActivity(createQuizStatIntent(correctGuesses, totalQuizzes, timeSpentOnQuiz))
@@ -101,22 +99,27 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun checkAnswer(selectedOption: String) {
-        val correctWord = intent.getStringExtra("currentWord")
-        val dbHelper = DataBaseHelper(this)
-        val struggleValue = if (selectedOption != intent.getStringExtra("correctTranslation")) 1 else -1
+        val isCorrect = selectedOption == intent.getStringExtra("correctTranslation")
 
-        correctGuesses += (-1 * struggleValue)
-        correctWord?.let { dbHelper.updateStruggleForWord(it, struggleValue) }
-        correctWord?.let { dbHelper.updateFreshnessForWord(it, 1) }
+        if (isCorrect) {
+            correctGuesses++
+        }
 
-        if (++currentQuizIndex < totalQuizzes) loadQuiz(currentQuizIndex)
-        else {
+        intent.getStringExtra("currentWord")?.let {
+            DataBaseHelper(this).updateStruggleForWord(it, if (isCorrect) -1 else 1)
+            DataBaseHelper(this).updateFreshnessForWord(it, 1)
+        }
+
+        if (++currentQuizIndex < totalQuizzes) {
+            loadQuiz(currentQuizIndex)
+        } else {
             quizEndTime = System.currentTimeMillis()
             val timeSpentOnQuiz = quizEndTime - quizStartTime
             startActivity(createQuizStatIntent(correctGuesses, totalQuizzes, timeSpentOnQuiz))
             finish()
         }
     }
+
 
     private fun createQuizStatIntent(correctGuesses: Int, totalQuizzes: Int, timeSpentOnQuiz: Long): Intent =
         Intent(this, QuizStatActivity::class.java).apply {

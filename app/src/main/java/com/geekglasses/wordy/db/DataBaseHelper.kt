@@ -61,10 +61,10 @@ class DataBaseHelper(context: Context?) : SQLiteOpenHelper(context, DATABASE_NAM
         val cursor: Cursor = writableDatabase.rawQuery("SELECT * FROM $WORD_TABLE", null)
         cursor.use {
             val idColumnIndex = it.getColumnIndex("ID")
-            val writingFormColumnIndex = it.getColumnIndex("WRITING_FORM")
-            val translationColumnIndex = it.getColumnIndex("TRANSLATION")
-            val struggleColumnIndex = it.getColumnIndex("STRUGGLE")
-            val freshnessColumnIndex = it.getColumnIndex("FRESHNESS")
+            val writingFormColumnIndex = it.getColumnIndex(COLUMN_WRITING_FORM)
+            val translationColumnIndex = it.getColumnIndex(COLUMN_TRANSLATION)
+            val struggleColumnIndex = it.getColumnIndex(COLUMN_STRUGGLE)
+            val freshnessColumnIndex = it.getColumnIndex(COLUMN_FRESHNESS)
 
             while (it.moveToNext()) {
                 val word = Word().apply {
