@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.PopupMenu
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var saveWordButton: Button
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
+    private lateinit var dictionarySize: TextView
 
     companion object {
         const val INITIAL_STRUGGLE = 0;
@@ -59,6 +61,9 @@ class MainActivity : AppCompatActivity() {
         saveWordButton = findViewById(R.id.saveWordButton)
         quizButton = findViewById(R.id.quizButton)
         optionsMenu = findViewById(R.id.optionsMenu)
+
+        dictionarySize = findViewById(R.id.dictionary_size)
+        dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
     }
 
     private fun setupListeners() {
@@ -116,6 +121,8 @@ class MainActivity : AppCompatActivity() {
             )
         )
         hideKeyboard()
+
+        "Dictionary size: ${(dictionarySize.text.split(" ")[2].toInt() + 1)}".also { dictionarySize.text = it }
     }
 
     private fun clearFields() {
@@ -159,6 +166,7 @@ class MainActivity : AppCompatActivity() {
                         .setPositiveButton("Yes") { _, _ ->
                             dbHelper.clearWordTable()
                             showToast("Cleared dictionary")
+                            dictionarySize.text = "Dictionary size: 0"
                         }
                         .setNegativeButton("No") { dialog, _ ->
                             dialog.cancel()
@@ -195,7 +203,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSetQuizSizeDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Set Quiz Size")
+        builder.setTitle("Set quiz size")
 
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_NUMBER
