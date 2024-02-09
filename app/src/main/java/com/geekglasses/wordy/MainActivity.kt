@@ -1,16 +1,18 @@
 package com.geekglasses.wordy
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
+import android.view.Gravity
 import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.PopupMenu
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -36,12 +38,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var saveWordButton: Button
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
-    private lateinit var dictionarySize: TextView
-
-    companion object {
-        const val INITIAL_STRUGGLE = 0;
-        const val INITIAL_FRESHNESS = 0;
-    }
+    private lateinit var dictionarySpinner: Spinner
+//    private lateinit var dictionarySize: TextView
 
     private val dbHelper by lazy { DataBaseHelper(this) }
 
@@ -61,9 +59,16 @@ class MainActivity : AppCompatActivity() {
         saveWordButton = findViewById(R.id.saveWordButton)
         quizButton = findViewById(R.id.quizButton)
         optionsMenu = findViewById(R.id.optionsMenu)
+        dictionarySpinner = findViewById(R.id.dictionary_spinner)
 
-        dictionarySize = findViewById(R.id.dictionary_size)
-        dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
+        val spinnerData = listOf("Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerData)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        dictionarySpinner.adapter = adapter
+
+//        dictionarySize = findViewById(R.id.dictionary_size)
+//        dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
     }
 
     private fun setupListeners() {
@@ -112,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveWord() {
-        dbHelper.addOne(
+        dbHelper.addOneWord(
             Word(
                 wordEditText.text.toString(),
                 translationEditText.text.toString(),
@@ -122,7 +127,7 @@ class MainActivity : AppCompatActivity() {
         )
         hideKeyboard()
 
-        "Dictionary size: ${(dictionarySize.text.split(" ")[2].toInt() + 1)}".also { dictionarySize.text = it }
+//        "Dictionary size: ${(dictionarySize.text.split(" ")[2].toInt() + 1)}".also { dictionarySize.text = it }
     }
 
     private fun clearFields() {
@@ -166,7 +171,7 @@ class MainActivity : AppCompatActivity() {
                         .setPositiveButton("Yes") { _, _ ->
                             dbHelper.clearWordTable()
                             showToast("Cleared dictionary")
-                            dictionarySize.text = "Dictionary size: 0"
+//                            dictionarySize.text = "Dictionary size: 0"
                         }
                         .setNegativeButton("No") { dialog, _ ->
                             dialog.cancel()
@@ -243,5 +248,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    companion object {
+        const val INITIAL_STRUGGLE = 0;
+        const val INITIAL_FRESHNESS = 0;
     }
 }
