@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -25,6 +26,7 @@ import com.geekglasses.wordy.activity.QuizActivity.Companion.TOTAL_QUIZZES_DEFAU
 import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
+import com.geekglasses.wordy.model.DictionarySpinnerAdapter
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
 import com.geekglasses.wordy.service.scheduler.freshness.FreshnessUpdateCheckScheduler
 import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
@@ -39,7 +41,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
     private lateinit var dictionarySpinner: Spinner
-//    private lateinit var dictionarySize: TextView
 
     private val dbHelper by lazy { DataBaseHelper(this) }
 
@@ -61,11 +62,19 @@ class MainActivity : AppCompatActivity() {
         optionsMenu = findViewById(R.id.optionsMenu)
         dictionarySpinner = findViewById(R.id.dictionary_spinner)
 
-        val spinnerData = listOf("Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerData)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinner: Spinner = findViewById(R.id.dictionary_spinner)
 
-        dictionarySpinner.adapter = adapter
+        val items = listOf("Add Word", "Item 1", "Item 2", "Item 3")
+        val adapter = DictionarySpinnerAdapter(this, items)
+        spinner.adapter = adapter
+
+
+
+//        val spinnerData = listOf("Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5")
+//        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerData)
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+//
+//        dictionarySpinner.adapter = adapter
 
 //        dictionarySize = findViewById(R.id.dictionary_size)
 //        dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
