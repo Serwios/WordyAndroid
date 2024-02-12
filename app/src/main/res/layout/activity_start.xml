@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/textViewGreeting"
+        android:layout_width="81dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="157dp"
+        android:layout_marginTop="219dp"
+        android:layout_marginEnd="157dp"
+        android:text="Hello"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="24sp" />
+
+    <EditText
+        android:id="@+id/editTextDictionaryName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewGreeting"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/edit_text_background"
+        android:hint="Enter dictionary name"
+        android:padding="12dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/buttonEnter"
+        android:layout_width="127dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextDictionaryName"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="141dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginEnd="144dp"
+        android:background="@drawable/button_background"
+        android:text="Enter"
+        android:textColor="@color/white" />
+
+</RelativeLayout>

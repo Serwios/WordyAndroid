@@ -1,19 +1,16 @@
 package com.geekglasses.wordy
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
-import android.view.Gravity
 import android.view.Menu
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.PopupMenu
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -26,7 +23,6 @@ import com.geekglasses.wordy.activity.QuizActivity.Companion.TOTAL_QUIZZES_DEFAU
 import com.geekglasses.wordy.activity.WordListActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
-import com.geekglasses.wordy.model.DictionarySpinnerAdapter
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
 import com.geekglasses.wordy.service.scheduler.freshness.FreshnessUpdateCheckScheduler
 import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
@@ -40,7 +36,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var saveWordButton: Button
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
-    private lateinit var dictionarySpinner: Spinner
+    private lateinit var dictionarySize: TextView
+
 
     private val dbHelper by lazy { DataBaseHelper(this) }
 
@@ -60,24 +57,10 @@ class MainActivity : AppCompatActivity() {
         saveWordButton = findViewById(R.id.saveWordButton)
         quizButton = findViewById(R.id.quizButton)
         optionsMenu = findViewById(R.id.optionsMenu)
-        dictionarySpinner = findViewById(R.id.dictionary_spinner)
 
-        val spinner: Spinner = findViewById(R.id.dictionary_spinner)
-
-        val items = listOf("Add Word", "Item 1", "Item 2", "Item 3")
-        val adapter = DictionarySpinnerAdapter(this, items)
-        spinner.adapter = adapter
-
-
-
-//        val spinnerData = listOf("Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 1", "Option 2", "Option 3", "Option 4", "Option 5")
-//        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerData)
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//
-//        dictionarySpinner.adapter = adapter
-
-//        dictionarySize = findViewById(R.id.dictionary_size)
-//        dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
+        dictionarySize = findViewById(R.id.dictionary_size)
+        dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
+        dictionarySize.text = "Dictionary name: ${dbHelper.getAllWords().size}"
     }
 
     private fun setupListeners() {
@@ -260,7 +243,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val INITIAL_STRUGGLE = 0;
-        const val INITIAL_FRESHNESS = 0;
+        const val INITIAL_STRUGGLE = 0
+        const val INITIAL_FRESHNESS = 0
+
+        fun createIntent(context: Context): Intent {
+            return Intent(context, MainActivity::class.java).apply {}
+        }
     }
 }
