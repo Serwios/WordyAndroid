@@ -2,7 +2,7 @@
     <item
         android:id="@+id/menu_dictionary"
         android:icon="@drawable/ic_icon"
-        android:title="Dictionary">
+        android:title="Current Dictionary">
         <menu
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
@@ -26,4 +26,7 @@
                 android:title="Size" />
         </menu>
     </item>
+    <item
+        android:id="@+id/dictionaries"
+        android:title="Dictionaries" />
 </menu>

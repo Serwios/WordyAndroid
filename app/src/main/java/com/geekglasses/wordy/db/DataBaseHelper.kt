@@ -102,6 +102,16 @@ class DataBaseHelper(context: Context?) :
         writableDatabase.close()
     }
 
+    fun clearAllWordsForPickedDictionary() {
+        val currentDictionaryName = getCurrentPickedDictionary() ?: return
+        clearWordsForDictionary(currentDictionaryName)
+    }
+
+    fun clearWordsForDictionary(dictionaryName: String) {
+        val dictionaryId = getDictionaryIdByName(dictionaryName) ?: return
+        writableDatabase.delete(WORD_TABLE, "$COLUMN_DICTIONARY_ID=?", arrayOf(dictionaryId.toString()))
+    }
+
     fun getAllWords(): List<Word> {
         val wordList = mutableListOf<Word>()
         val cursor: Cursor = writableDatabase.rawQuery("SELECT * FROM $WORD_TABLE", null)
@@ -224,7 +234,7 @@ class DataBaseHelper(context: Context?) :
         return null
     }
 
-    fun resolveWordsForCurrentPickedDictionary(): List<Word>? {
+    fun getWordsForCurrentPickedDictionary(): List<Word>? {
         val currentDictionaryName = getCurrentPickedDictionary()
 
         if (currentDictionaryName != null) {

@@ -11,6 +11,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         dictionarySize = findViewById(R.id.dictionary_size)
         dictionaryName = findViewById(R.id.dictionary_name)
 
-        dictionarySize.text = "Size: ${dbHelper.resolveWordsForCurrentPickedDictionary()?.size}"
+        dictionarySize.text = "Size: ${dbHelper.getWordsForCurrentPickedDictionary()?.size}"
         dictionaryName.text = "Name: ${dbHelper.getCurrentPickedDictionary()}"
     }
 
@@ -165,9 +166,9 @@ class MainActivity : AppCompatActivity() {
                     alertDialogBuilder.setMessage("Are you sure you want to clear the dictionary?")
                         .setCancelable(false)
                         .setPositiveButton("Yes") { _, _ ->
-                            dbHelper.clearWordTable()
+                            dbHelper.clearAllWordsForPickedDictionary()
                             showToast("Cleared dictionary")
-//                            dictionarySize.text = "Dictionary size: 0"
+                            dictionarySize.text = "Size: 0"
                         }
                         .setNegativeButton("No") { dialog, _ ->
                             dialog.cancel()
@@ -179,12 +180,22 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.show_dictionary -> {
-                    startActivity(WordListActivity.createIntent(this, ArrayList(dbHelper.getAllWords())))
+                    startActivity(dbHelper.getWordsForCurrentPickedDictionary()?.let { ArrayList(it) }
+                        ?.let {
+                            WordListActivity.createIntent(this,
+                                it
+                            )
+                        })
                     true
                 }
 
                 R.id.set_quiz_size -> {
                     showSetQuizSizeDialog()
+                    true
+                }
+
+                R.id.dictionaries -> {
+
                     true
                 }
 
@@ -219,12 +230,13 @@ class MainActivity : AppCompatActivity() {
             if (inputValue.isNotEmpty()) {
                 val quizSize = inputValue.toInt()
                 if (quizSize > 0) {
-                    if (quizSize > dbHelper.getAllWords().size) {
+                    if (quizSize > dbHelper.getWordsForCurrentPickedDictionary()?.size!!) {
                         showToast("There are not enough words for a quiz of size $quizSize")
                         showSetQuizSizeDialog()
                         return@setPositiveButton
                     }
 
+                    // TODO: Make quiz size different for different dictionary
                     getSharedPreferences("user_pref", Context.MODE_PRIVATE)
                         .edit()
                         .putInt("quizSize", quizSize)
