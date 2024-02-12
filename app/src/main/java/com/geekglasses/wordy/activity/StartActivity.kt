@@ -8,15 +8,15 @@ import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.MainActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
-import com.geekglasses.wordy.preference.SharedPreferencesManager
+
 
 class StartActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
 
-        val sharedPreferencesManager = SharedPreferencesManager(this)
-        if (sharedPreferencesManager.getCurrentDictionary() != null) {
+        val dbHelper = DataBaseHelper(this)
+        if (dbHelper.getCurrentPickedDictionary() != null) {
             navigateToMainActivity()
         }
 
@@ -25,7 +25,7 @@ class StartActivity : AppCompatActivity() {
 
         editTextDictionaryName.setOnKeyListener { _, keyCode, event ->
             if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-                sharedPreferencesManager.setCurrentDictionary(editTextDictionaryName.text.toString())
+                dbHelper.addInitialDictionary(editTextDictionaryName.text.toString())
                 navigateToMainActivity()
 
                 return@setOnKeyListener true
@@ -34,6 +34,7 @@ class StartActivity : AppCompatActivity() {
         }
 
         buttonEnter.setOnClickListener {
+            dbHelper.addInitialDictionary(editTextDictionaryName.text.toString())
             navigateToMainActivity()
         }
     }

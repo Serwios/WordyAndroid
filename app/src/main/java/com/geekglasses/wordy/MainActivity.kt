@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var quizButton: Button
     private lateinit var optionsMenu: View
     private lateinit var dictionarySize: TextView
-
+    private lateinit var dictionaryName: TextView
 
     private val dbHelper by lazy { DataBaseHelper(this) }
 
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initViews()
+
         setupListeners()
 
         scheduleTasks()
@@ -59,8 +61,10 @@ class MainActivity : AppCompatActivity() {
         optionsMenu = findViewById(R.id.optionsMenu)
 
         dictionarySize = findViewById(R.id.dictionary_size)
-        dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
-        dictionarySize.text = "Dictionary name: ${dbHelper.getAllWords().size}"
+        dictionaryName = findViewById(R.id.dictionary_name)
+
+        dictionarySize.text = "Size: ${dbHelper.resolveWordsForCurrentPickedDictionary()?.size}"
+        dictionaryName.text = "Name: ${dbHelper.getCurrentPickedDictionary()}"
     }
 
     private fun setupListeners() {
@@ -109,7 +113,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveWord() {
-        dbHelper.addOneWord(
+        dbHelper.addOneWordForPickedDictionary(
             Word(
                 wordEditText.text.toString(),
                 translationEditText.text.toString(),
@@ -119,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         )
         hideKeyboard()
 
-//        "Dictionary size: ${(dictionarySize.text.split(" ")[2].toInt() + 1)}".also { dictionarySize.text = it }
+        "Dictionary size: ${(dictionarySize.text.split(" ")[1].toInt() + 1)}".also { dictionarySize.text = it }
     }
 
     private fun clearFields() {
@@ -192,6 +196,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.example_menu, menu)
+
+        val dictionaryItem: MenuItem? = menu.findItem(R.id.menu_dictionary)
+        if (dictionaryItem != null) {
+            val pickedDictionaryName = dbHelper.getCurrentPickedDictionary()
+            dictionaryItem.title = pickedDictionaryName ?: "Dictionary"
+        }
+
         return true
     }
 

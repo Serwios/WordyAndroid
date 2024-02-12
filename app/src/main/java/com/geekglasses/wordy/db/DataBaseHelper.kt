@@ -11,10 +11,11 @@ class DataBaseHelper(context: Context?) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
         const val DATABASE_NAME = "wordyDB"
-        const val DATABASE_VERSION = 3
+        const val DATABASE_VERSION = 5
         const val DICTIONARY_TABLE = "DICTIONARY_TABLE"
         const val COLUMN_DICTIONARY_ID = "DICTIONARY_ID"
         const val COLUMN_DICTIONARY_NAME = "DICTIONARY_NAME"
+        const val COLUMN_IS_PICKED = "IS_PICKED"
         const val WORD_TABLE = "WORD_TABLE"
         const val COLUMN_WORD_ID = "ID"
         const val COLUMN_WRITING_FORM = "WRITING_FORM"
@@ -25,7 +26,7 @@ class DataBaseHelper(context: Context?) :
 
     override fun onCreate(db: SQLiteDatabase) {
         val createDictionaryTableStatement =
-            "CREATE TABLE $DICTIONARY_TABLE ($COLUMN_DICTIONARY_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_DICTIONARY_NAME TEXT)"
+            "CREATE TABLE $DICTIONARY_TABLE ($COLUMN_DICTIONARY_ID INTEGER PRIMARY KEY AUTOINCREMENT, $COLUMN_DICTIONARY_NAME TEXT, $COLUMN_IS_PICKED INTEGER)"
         val createWordTableStatement =
             "CREATE TABLE $WORD_TABLE ($COLUMN_WORD_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "$COLUMN_DICTIONARY_ID INTEGER, " +
@@ -39,16 +40,24 @@ class DataBaseHelper(context: Context?) :
         db.execSQL(createWordTableStatement)
     }
 
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 3) {
+        if (oldVersion < DATABASE_VERSION) {
             db.execSQL("DROP TABLE IF EXISTS $WORD_TABLE")
             db.execSQL("DROP TABLE IF EXISTS $DICTIONARY_TABLE")
             onCreate(db)
         }
     }
 
-    fun addOneWord(word: Word): Boolean {
+    fun addOneWordForPickedDictionary(word: Word): Boolean {
+        val currentDictionary = getCurrentPickedDictionary() ?: return false
+        return addOneWordForDictionary(word, currentDictionary)
+    }
+
+    fun addOneWordForDictionary(word: Word, dictionaryName: String): Boolean {
+        val dictionaryId = getDictionaryIdByName(dictionaryName) ?: return false // Retrieve dictionary ID
         val cv = ContentValues().apply {
+            put(COLUMN_DICTIONARY_ID, dictionaryId)
             put(COLUMN_WRITING_FORM, word.writingForm)
             put(COLUMN_TRANSLATION, word.translation)
             put(COLUMN_STRUGGLE, word.struggle)
@@ -59,6 +68,22 @@ class DataBaseHelper(context: Context?) :
         } catch (e: Exception) {
             println("Failed to add data to DB, message: ${e.message}")
             false
+        }
+    }
+
+    private fun getDictionaryIdByName(dictionaryName: String): Long? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT $COLUMN_DICTIONARY_ID FROM $DICTIONARY_TABLE WHERE $COLUMN_DICTIONARY_NAME = ?",
+            arrayOf(dictionaryName)
+        )
+        return cursor.use {
+            val columnIndex = it.getColumnIndex(COLUMN_DICTIONARY_ID)
+            if (columnIndex != -1 && it.moveToFirst()) {
+                it.getLong(columnIndex)
+            } else {
+                null
+            }
         }
     }
 
@@ -157,5 +182,94 @@ class DataBaseHelper(context: Context?) :
             println("Failed to add dictionary to DB, message: ${e.message}")
             false
         }
+    }
+
+    fun addInitialDictionary(dictionaryName: String): Boolean {
+        val cv = ContentValues().apply {
+            put(COLUMN_DICTIONARY_NAME, dictionaryName)
+            put(COLUMN_IS_PICKED, 1)
+        }
+        return try {
+            writableDatabase.insert(DICTIONARY_TABLE, null, cv) > 0
+        } catch (e: Exception) {
+            println("Failed to add dictionary to DB, message: ${e.message}")
+            false
+        }
+    }
+
+    fun hasDictionaries(): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT COUNT(*) FROM $DICTIONARY_TABLE", null)
+        cursor.use {
+            if (it.moveToFirst()) {
+                val count = it.getInt(0)
+                return count > 0
+            }
+        }
+        return false
+    }
+
+    fun getCurrentPickedDictionary(): String? {
+        val db = readableDatabase
+        val cursor =
+            db.rawQuery("SELECT * FROM $DICTIONARY_TABLE WHERE $COLUMN_IS_PICKED = 1", null)
+        cursor.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndex(COLUMN_DICTIONARY_NAME)
+                if (columnIndex != -1) {
+                    return it.getString(columnIndex)
+                }
+            }
+        }
+        return null
+    }
+
+    fun resolveWordsForCurrentPickedDictionary(): List<Word>? {
+        val currentDictionaryName = getCurrentPickedDictionary()
+
+        if (currentDictionaryName != null) {
+            val words = mutableListOf<Word>()
+            val db = readableDatabase
+
+            val query = """
+            SELECT $COLUMN_WRITING_FORM, $COLUMN_TRANSLATION, $COLUMN_STRUGGLE, $COLUMN_FRESHNESS 
+            FROM $WORD_TABLE 
+            WHERE $COLUMN_DICTIONARY_ID = (
+                SELECT $COLUMN_DICTIONARY_ID 
+                FROM $DICTIONARY_TABLE 
+                WHERE $COLUMN_DICTIONARY_NAME = ?
+            )
+        """.trimIndent()
+
+            val selectionArgs = arrayOf(currentDictionaryName)
+            val cursor = db.rawQuery(query, selectionArgs)
+
+            cursor.use {
+                val writingFormIndex = cursor.getColumnIndex(COLUMN_WRITING_FORM)
+                val translationIndex = cursor.getColumnIndex(COLUMN_TRANSLATION)
+                val struggleIndex = cursor.getColumnIndex(COLUMN_STRUGGLE)
+                val freshnessIndex = cursor.getColumnIndex(COLUMN_FRESHNESS)
+
+                while (cursor.moveToNext()) {
+                    val writingForm = if (writingFormIndex != -1) cursor.getString(writingFormIndex) else ""
+                    val translation = if (translationIndex != -1) cursor.getString(translationIndex) else ""
+                    val struggle = if (struggleIndex != -1) cursor.getInt(struggleIndex) else 0
+                    val freshness = if (freshnessIndex != -1) cursor.getInt(freshnessIndex) else 0
+
+                    val word = Word(writingForm, translation, struggle, freshness)
+                    words.add(word)
+                }
+            }
+            return words
+        } else {
+            return null
+        }
+    }
+
+    fun clearDb() {
+        val db = readableDatabase
+        db.execSQL("DROP TABLE IF EXISTS $WORD_TABLE")
+        db.execSQL("DROP TABLE IF EXISTS $DICTIONARY_TABLE")
+        onCreate(db)
     }
 }
