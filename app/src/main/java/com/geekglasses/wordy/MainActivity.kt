@@ -38,10 +38,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var optionsMenu: View
     private lateinit var dictionarySize: TextView
 
-    companion object {
-        const val INITIAL_STRUGGLE = 0;
-        const val INITIAL_FRESHNESS = 0;
-    }
 
     private val dbHelper by lazy { DataBaseHelper(this) }
 
@@ -64,6 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         dictionarySize = findViewById(R.id.dictionary_size)
         dictionarySize.text = "Dictionary size: ${dbHelper.getAllWords().size}"
+        dictionarySize.text = "Dictionary name: ${dbHelper.getAllWords().size}"
     }
 
     private fun setupListeners() {
@@ -112,7 +109,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveWord() {
-        dbHelper.addOne(
+        dbHelper.addOneWord(
             Word(
                 wordEditText.text.toString(),
                 translationEditText.text.toString(),
@@ -122,7 +119,7 @@ class MainActivity : AppCompatActivity() {
         )
         hideKeyboard()
 
-        "Dictionary size: ${(dictionarySize.text.split(" ")[2].toInt() + 1)}".also { dictionarySize.text = it }
+//        "Dictionary size: ${(dictionarySize.text.split(" ")[2].toInt() + 1)}".also { dictionarySize.text = it }
     }
 
     private fun clearFields() {
@@ -166,7 +163,7 @@ class MainActivity : AppCompatActivity() {
                         .setPositiveButton("Yes") { _, _ ->
                             dbHelper.clearWordTable()
                             showToast("Cleared dictionary")
-                            dictionarySize.text = "Dictionary size: 0"
+//                            dictionarySize.text = "Dictionary size: 0"
                         }
                         .setNegativeButton("No") { dialog, _ ->
                             dialog.cancel()
@@ -243,5 +240,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    companion object {
+        const val INITIAL_STRUGGLE = 0
+        const val INITIAL_FRESHNESS = 0
+
+        fun createIntent(context: Context): Intent {
+            return Intent(context, MainActivity::class.java).apply {}
+        }
     }
 }

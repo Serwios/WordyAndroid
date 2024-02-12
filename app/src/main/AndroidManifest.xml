@@ -20,7 +20,7 @@
         android:theme="@style/Theme.Wordy"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.StartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,5 +31,6 @@
         <activity android:name=".activity.QuizActivity" />
         <activity android:name=".activity.QuizStatActivity" />
         <activity android:name=".activity.WordListActivity" />
+        <activity android:name=".MainActivity" />
     </application>
 </manifest>
