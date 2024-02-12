@@ -47,6 +47,7 @@
 
     <EditText
         android:id="@+id/wordEditText"
+        android:hint="Word"
         android:layout_width="271dp"
         android:layout_height="72dp"
         android:layout_marginStart="116dp"
@@ -54,7 +55,6 @@
         android:layout_marginEnd="116dp"
         android:ems="10"
         android:inputType="text"
-        android:text="Word"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.524"
         app:layout_constraintStart_toStartOf="parent"
@@ -68,7 +68,7 @@
         android:layout_marginEnd="116dp"
         android:ems="10"
         android:inputType="text"
-        android:text="Translation"
+        android:hint="Translation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.524"
         app:layout_constraintStart_toStartOf="parent"

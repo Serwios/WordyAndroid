@@ -6,12 +6,10 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
@@ -48,9 +46,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initViews()
-
         setupListeners()
-
         scheduleTasks()
     }
 
@@ -69,9 +65,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        wordEditText.clearOnTouchListener()
-        translationEditText.clearOnTouchListener()
-
         saveWordButton.setOnClickListener {
             if (isWordValid(wordEditText.text.toString()) && isWordValid(translationEditText.text.toString())) {
                 if (isWordExist(wordEditText.text.toString(), dbHelper)) {
@@ -80,7 +73,6 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 saveWord()
-                clearFields()
             } else {
                 showToast("Input words invalid")
             }
@@ -125,18 +117,6 @@ class MainActivity : AppCompatActivity() {
         hideKeyboard()
 
         "Dictionary size: ${(dictionarySize.text.split(" ")[1].toInt() + 1)}".also { dictionarySize.text = it }
-    }
-
-    private fun clearFields() {
-        wordEditText.text.clear()
-        translationEditText.text.clear()
-    }
-
-    private fun View.clearOnTouchListener() {
-        setOnTouchListener(fun(_: View, _: MotionEvent): Boolean {
-            (this as EditText).text.clear()
-            return false
-        })
     }
 
     private fun scheduleQuizRequestNotification() {
