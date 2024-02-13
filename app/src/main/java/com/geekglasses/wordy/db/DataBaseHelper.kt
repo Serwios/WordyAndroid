@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.geekglasses.wordy.entity.Word
+import com.geekglasses.wordy.model.Dictionary
 
 class DataBaseHelper(context: Context?) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -273,6 +274,67 @@ class DataBaseHelper(context: Context?) :
             return words
         } else {
             return null
+        }
+    }
+
+    fun getAllDictionaries(): List<Dictionary> {
+        val dictionaryList = mutableListOf<Dictionary>()
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $DICTIONARY_TABLE", null)
+
+        cursor.use {
+            val idIndex = it.getColumnIndex(COLUMN_DICTIONARY_ID)
+            val nameIndex = it.getColumnIndex(COLUMN_DICTIONARY_NAME)
+            val isPickedIndex = it.getColumnIndex(COLUMN_IS_PICKED)
+
+            while (it.moveToNext()) {
+                val id = if (idIndex != -1) it.getLong(idIndex) else 0
+                val name = if (nameIndex != -1) it.getString(nameIndex) else ""
+                val isPicked = if (isPickedIndex != -1) it.getInt(isPickedIndex) == 1 else false
+
+                val dictionary = Dictionary(id, name, isPicked)
+                dictionaryList.add(dictionary)
+            }
+        }
+
+        return dictionaryList
+    }
+
+    fun getDictionarySize(dictionaryName: String): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM $WORD_TABLE WHERE $COLUMN_DICTIONARY_ID = (SELECT $COLUMN_DICTIONARY_ID FROM $DICTIONARY_TABLE WHERE $COLUMN_DICTIONARY_NAME = ?)",
+            arrayOf(dictionaryName)
+        )
+
+        cursor.use {
+            if (it.moveToFirst()) {
+                return it.getInt(0)
+            }
+        }
+
+        return 0
+    }
+
+    fun deleteDictionary(dictionaryName: String): Boolean {
+        val db = writableDatabase
+        return try {
+            db.beginTransaction()
+
+            val dictionaryId = getDictionaryIdByName(dictionaryName)
+            dictionaryId?.let { id ->
+                db.delete(WORD_TABLE, "$COLUMN_DICTIONARY_ID = ?", arrayOf(id.toString()))
+            }
+
+            db.delete(DICTIONARY_TABLE, "$COLUMN_DICTIONARY_NAME = ?", arrayOf(dictionaryName))
+
+            db.setTransactionSuccessful()
+            true
+        } catch (e: Exception) {
+            println("Failed to delete dictionary from DB, message: ${e.message}")
+            false
+        } finally {
+            db.endTransaction()
         }
     }
 

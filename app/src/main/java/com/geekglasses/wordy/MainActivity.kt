@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.geekglasses.wordy.activity.AllDictionariesActivity
 import com.geekglasses.wordy.activity.QuizActivity
 import com.geekglasses.wordy.activity.QuizActivity.Companion.TOTAL_QUIZZES_DEFAULT_SIZE
 import com.geekglasses.wordy.activity.WordListActivity
@@ -175,7 +176,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.dictionaries -> {
-
+                    startActivity(AllDictionariesActivity.createIntent(this))
                     true
                 }
 
