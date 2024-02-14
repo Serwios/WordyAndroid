@@ -56,7 +56,7 @@ class DataBaseHelper(context: Context?) :
     }
 
     fun addOneWordForDictionary(word: Word, dictionaryName: String): Boolean {
-        val dictionaryId = getDictionaryIdByName(dictionaryName) ?: return false // Retrieve dictionary ID
+        val dictionaryId = getDictionaryIdByName(dictionaryName) ?: return false
         val cv = ContentValues().apply {
             put(COLUMN_DICTIONARY_ID, dictionaryId)
             put(COLUMN_WRITING_FORM, word.writingForm)

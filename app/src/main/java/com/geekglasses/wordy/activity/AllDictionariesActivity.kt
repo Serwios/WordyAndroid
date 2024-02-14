@@ -4,35 +4,78 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.geekglasses.wordy.MainActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 
 class AllDictionariesActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DataBaseHelper
+    private lateinit var tableLayout: TableLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_dictionaries)
 
         dbHelper = DataBaseHelper(this)
+        tableLayout = findViewById(R.id.tableLayout)
 
         val backButton: Button = findViewById(R.id.backButtonDictionaries)
         backButton.setOnClickListener {
             onBackPressed()
         }
 
+        val addDictionaryButton: Button = findViewById(R.id.addDictionaryButton)
+        addDictionaryButton.setOnClickListener {
+            showAddDictionaryDialog()
+        }
+
+        populateDictionaryTable()
+    }
+
+    private fun showAddDictionaryDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Add Dictionary")
+
+        val input = EditText(this)
+        builder.setView(input)
+
+        builder.setPositiveButton("OK") { dialog, _ ->
+            val dictionaryName = input.text.toString()
+            if (dictionaryName.isNotBlank()) {
+                addNewDictionary(dictionaryName)
+            }
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        builder.show()
+    }
+
+    private fun addNewDictionary(dictionaryName: String) {
+        if (dbHelper.addDictionary(dictionaryName)) {
+            refreshDictionaryTable()
+        } else {
+            Toast.makeText(this, "Failed to add dictionary", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun refreshDictionaryTable() {
+        tableLayout.removeAllViews()
         populateDictionaryTable()
     }
 
     private fun populateDictionaryTable() {
         val dictionaries = dbHelper.getAllDictionaries()
-        val tableLayout = findViewById<TableLayout>(R.id.tableLayout)
 
         for (dictionary in dictionaries) {
             val row = TableRow(this)
@@ -51,7 +94,7 @@ class AllDictionariesActivity : AppCompatActivity() {
             deleteButton.text = "X"
             deleteButton.setOnClickListener {
                 dbHelper.deleteDictionary(dictionary.name)
-                tableLayout.removeView(row)
+                refreshDictionaryTable()
             }
             row.addView(deleteButton)
 

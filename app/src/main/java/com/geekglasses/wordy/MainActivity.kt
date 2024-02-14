@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 saveWord()
+                clearInputTexts()
             } else {
                 showToast("Input words invalid")
             }
@@ -117,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         )
         hideKeyboard()
 
-        "Dictionary size: ${(dictionarySize.text.split(" ")[1].toInt() + 1)}".also { dictionarySize.text = it }
+        "Size: ${(dictionarySize.text.split(" ")[1].toInt() + 1)}".also { dictionarySize.text = it }
     }
 
     private fun scheduleQuizRequestNotification() {
@@ -130,6 +131,11 @@ class MainActivity : AppCompatActivity() {
             ExistingPeriodicWorkPolicy.REPLACE,
             workRequest
         )
+    }
+
+    private fun clearInputTexts() {
+        wordEditText.text.clear()
+        translationEditText.text.clear()
     }
 
     private fun hideKeyboard() {
