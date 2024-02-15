@@ -3,8 +3,12 @@ package com.geekglasses.wordy.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.ScrollView
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -17,14 +21,16 @@ import com.geekglasses.wordy.db.DataBaseHelper
 class AllDictionariesActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DataBaseHelper
-    private lateinit var tableLayout: TableLayout
+    private lateinit var scrollView: ScrollView
+    private lateinit var dictionaryContainer: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_dictionaries)
 
         dbHelper = DataBaseHelper(this)
-        tableLayout = findViewById(R.id.tableLayout)
+        scrollView = findViewById(R.id.scrollView)
+        dictionaryContainer = findViewById(R.id.dictionaryContainer)
 
         val backButton: Button = findViewById(R.id.backButtonDictionaries)
         backButton.setOnClickListener {
@@ -36,7 +42,62 @@ class AllDictionariesActivity : AppCompatActivity() {
             showAddDictionaryDialog()
         }
 
-        populateDictionaryTable()
+        populateDictionaryButtons()
+    }
+
+    private fun populateDictionaryButtons() {
+        val dictionaries = dbHelper.getAllDictionaries()
+        val currentPickedDictionary = dbHelper.getCurrentPickedDictionary()
+
+        for (dictionary in dictionaries) {
+            val container = RelativeLayout(this)
+            container.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+            val dictionaryButton = Button(this)
+            dictionaryButton.text = dictionary.name
+            dictionaryButton.setOnClickListener {
+                handleDictionarySelection(dictionary.name)
+            }
+            val buttonParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            buttonParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
+            container.addView(dictionaryButton, buttonParams)
+
+            val deleteButton = Button(this)
+            deleteButton.text = "X"
+            deleteButton.setOnClickListener {
+                if (dictionary.name != currentPickedDictionary) {
+                    dbHelper.deleteDictionary(dictionary.name)
+                    refreshDictionaryButtons()
+                } else {
+                    Toast.makeText(this, "Cannot delete the currently picked dictionary", Toast.LENGTH_SHORT).show()
+                }
+            }
+            val deleteParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            deleteParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+            container.addView(deleteButton, deleteParams)
+
+            val dictionarySizeTextView = TextView(this)
+            dictionarySizeTextView.text = dbHelper.getDictionarySize(dictionary.name).toString()
+            val sizeParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            sizeParams.topMargin = resources.getDimensionPixelSize(R.dimen.text_margin_top)
+            sizeParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
+            container.addView(dictionarySizeTextView, sizeParams)
+
+            dictionaryContainer.addView(container)
+        }
+    }
+    private fun handleDictionarySelection(dictionaryName: String) {
+        if (dbHelper.pickDictionary(dictionaryName)) {
+            Toast.makeText(this, "Picked dictionary: $dictionaryName", Toast.LENGTH_SHORT).show()
+            refreshDictionaryButtons()
+        } else {
+            Toast.makeText(this, "Failed to pick dictionary", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun refreshDictionaryButtons() {
+        dictionaryContainer.removeAllViews()
+        populateDictionaryButtons()
     }
 
     private fun showAddDictionaryDialog() {
@@ -63,15 +124,10 @@ class AllDictionariesActivity : AppCompatActivity() {
 
     private fun addNewDictionary(dictionaryName: String) {
         if (dbHelper.addDictionary(dictionaryName)) {
-            refreshDictionaryTable()
+            refreshDictionaryButtons()
         } else {
             Toast.makeText(this, "Failed to add dictionary", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun refreshDictionaryTable() {
-        tableLayout.removeAllViews()
-        populateDictionaryTable()
     }
 
     private fun populateDictionaryTable() {
@@ -94,11 +150,11 @@ class AllDictionariesActivity : AppCompatActivity() {
             deleteButton.text = "X"
             deleteButton.setOnClickListener {
                 dbHelper.deleteNonPickedDictionary(dictionary.name, this)
-                refreshDictionaryTable()
+                refreshDictionaryButtons()
             }
             row.addView(deleteButton)
 
-            tableLayout.addView(row)
+            refreshDictionaryButtons()
         }
     }
 

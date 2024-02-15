@@ -346,6 +346,42 @@ class DataBaseHelper(context: Context?) :
         }
     }
 
+    fun pickDictionary(dictionaryName: String): Boolean {
+        val db = writableDatabase
+        return try {
+            db.beginTransaction()
+            db.execSQL("UPDATE $DICTIONARY_TABLE SET $COLUMN_IS_PICKED = 0 WHERE $COLUMN_IS_PICKED = 1")
+            db.execSQL("UPDATE $DICTIONARY_TABLE SET $COLUMN_IS_PICKED = 1 WHERE $COLUMN_DICTIONARY_NAME = ?", arrayOf(dictionaryName))
+            db.setTransactionSuccessful()
+            true
+        } catch (e: Exception) {
+            println("Failed to pick dictionary, message: ${e.message}")
+            false
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    fun deleteDictionary(dictionaryName: String): Boolean {
+        val db = writableDatabase
+        return try {
+            db.beginTransaction()
+            val dictionaryId = getDictionaryIdByName(dictionaryName)
+            dictionaryId?.let { id ->
+                db.delete(WORD_TABLE, "$COLUMN_DICTIONARY_ID = ?", arrayOf(id.toString()))
+            }
+            db.delete(DICTIONARY_TABLE, "$COLUMN_DICTIONARY_NAME = ?", arrayOf(dictionaryName))
+
+            db.setTransactionSuccessful()
+            true
+        } catch (e: Exception) {
+            println("Failed to delete dictionary from DB, message: ${e.message}")
+            false
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     fun clearDb() {
         val db = readableDatabase
         db.execSQL("DROP TABLE IF EXISTS $WORD_TABLE")

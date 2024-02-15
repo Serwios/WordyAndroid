@@ -10,11 +10,12 @@
         android:layout_height="match_parent"
         android:layout_above="@id/addDictionaryButton">
 
-        <TableLayout
-            android:id="@+id/tableLayout"
+        <LinearLayout
+            android:id="@+id/dictionaryContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:stretchColumns="*" />
+            android:orientation="vertical" />
+
     </ScrollView>
 
     <Button
