@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.widget.Toast
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.model.Dictionary
 
@@ -316,20 +317,27 @@ class DataBaseHelper(context: Context?) :
         return 0
     }
 
-    fun deleteDictionary(dictionaryName: String): Boolean {
+    fun deleteNonPickedDictionary(dictionaryName: String, context: Context?): Boolean {
         val db = writableDatabase
         return try {
             db.beginTransaction()
 
             val dictionaryId = getDictionaryIdByName(dictionaryName)
-            dictionaryId?.let { id ->
-                db.delete(WORD_TABLE, "$COLUMN_DICTIONARY_ID = ?", arrayOf(id.toString()))
+            val currentDictionaryName = getCurrentPickedDictionary()
+
+            if (currentDictionaryName != dictionaryName) {
+                dictionaryId?.let { id ->
+                    db.delete(WORD_TABLE, "$COLUMN_DICTIONARY_ID = ?", arrayOf(id.toString()))
+                }
+
+                db.delete(DICTIONARY_TABLE, "$COLUMN_DICTIONARY_NAME = ?", arrayOf(dictionaryName))
+
+                db.setTransactionSuccessful()
+                true
+            } else {
+                Toast.makeText(context, "You cannot delete picked dictionary", Toast.LENGTH_SHORT).show()
+                false
             }
-
-            db.delete(DICTIONARY_TABLE, "$COLUMN_DICTIONARY_NAME = ?", arrayOf(dictionaryName))
-
-            db.setTransactionSuccessful()
-            true
         } catch (e: Exception) {
             println("Failed to delete dictionary from DB, message: ${e.message}")
             false

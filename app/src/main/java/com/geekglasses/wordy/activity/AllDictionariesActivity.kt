@@ -93,7 +93,7 @@ class AllDictionariesActivity : AppCompatActivity() {
             val deleteButton = Button(this)
             deleteButton.text = "X"
             deleteButton.setOnClickListener {
-                dbHelper.deleteDictionary(dictionary.name)
+                dbHelper.deleteNonPickedDictionary(dictionary.name, this)
                 refreshDictionaryTable()
             }
             row.addView(deleteButton)
