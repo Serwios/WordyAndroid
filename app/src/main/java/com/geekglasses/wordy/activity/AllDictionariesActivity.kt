@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.geekglasses.wordy.MainActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 
@@ -34,7 +35,7 @@ class AllDictionariesActivity : AppCompatActivity() {
 
         val backButton: Button = findViewById(R.id.backButtonDictionaries)
         backButton.setOnClickListener {
-            onBackPressed()
+            startActivity(MainActivity.createIntent(this))
         }
 
         val addDictionaryButton: Button = findViewById(R.id.addDictionaryButton)
@@ -127,34 +128,6 @@ class AllDictionariesActivity : AppCompatActivity() {
             refreshDictionaryButtons()
         } else {
             Toast.makeText(this, "Failed to add dictionary", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun populateDictionaryTable() {
-        val dictionaries = dbHelper.getAllDictionaries()
-
-        for (dictionary in dictionaries) {
-            val row = TableRow(this)
-            val params = TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT)
-            row.layoutParams = params
-
-            val dictionaryNameTextView = TextView(this)
-            dictionaryNameTextView.text = dictionary.name
-            row.addView(dictionaryNameTextView)
-
-            val dictionarySizeTextView = TextView(this)
-            dictionarySizeTextView.text = dbHelper.getDictionarySize(dictionary.name).toString()
-            row.addView(dictionarySizeTextView)
-
-            val deleteButton = Button(this)
-            deleteButton.text = "X"
-            deleteButton.setOnClickListener {
-                dbHelper.deleteNonPickedDictionary(dictionary.name, this)
-                refreshDictionaryButtons()
-            }
-            row.addView(deleteButton)
-
-            refreshDictionaryButtons()
         }
     }
 
