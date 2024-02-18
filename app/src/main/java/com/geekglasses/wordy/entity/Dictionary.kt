@@ -1,4 +1,4 @@
-package com.geekglasses.wordy.model
+package com.geekglasses.wordy.entity
 
 data class Dictionary(
     val id: Long,

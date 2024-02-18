@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
-import com.geekglasses.wordy.model.QuizResultingData
+import com.geekglasses.wordy.model.QuizStatisticData
 
 class QuizStatisticActivity : AppCompatActivity() {
     private lateinit var okButton: Button
@@ -35,10 +35,10 @@ class QuizStatisticActivity : AppCompatActivity() {
     }
 
     private fun displayQuizStat() {
-        val quizResultingData = intent.getParcelableExtra<QuizResultingData>(QUIZ_STAT_DATA_EXTRA)
-        numberOfWords.text = "Words #${quizResultingData?.numberOfWords}"
-        numberOfGuessedWords.text = "Guessed #${quizResultingData?.numberOfGuessedWords}"
-        val timeSpentInMillis = quizResultingData?.timeSpentOnQuiz ?: 0L
+        val quizStatisticData = intent.getParcelableExtra<QuizStatisticData>(QUIZ_STAT_DATA_EXTRA)
+        numberOfWords.text = "Words #${quizStatisticData?.numberOfWords}"
+        numberOfGuessedWords.text = "Guessed #${quizStatisticData?.numberOfGuessedWords}"
+        val timeSpentInMillis = quizStatisticData?.timeSpentOnQuiz ?: 0L
         val timeSpentInSeconds = timeSpentInMillis / 1000
         timeSpendValue.text = "Time spent: $timeSpentInSeconds seconds"
 
@@ -69,7 +69,7 @@ class QuizStatisticActivity : AppCompatActivity() {
             return Intent(context, QuizStatisticActivity::class.java).apply {
                 putExtra(
                     QUIZ_STAT_DATA_EXTRA,
-                    QuizResultingData(correctGuesses, totalQuizzes, timeSpentOnQuiz)
+                    QuizStatisticData(correctGuesses, totalQuizzes, timeSpentOnQuiz)
                 )
             }
         }

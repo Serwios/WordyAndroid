@@ -1,8 +1,7 @@
 package com.geekglasses.wordy.service.quiz
 
-import android.os.Parcelable
 import com.geekglasses.wordy.db.DataBaseHelper
-import com.geekglasses.wordy.mapper.WordToQuizDataMapper
+import com.geekglasses.wordy.mapper.WordsToQuizDataMapper
 import com.geekglasses.wordy.model.QuizData
 import com.geekglasses.wordy.service.word.WordProcessor
 
@@ -11,7 +10,7 @@ class QuizDataResolver {
         fun resolveQuizData(dbHelper: DataBaseHelper): ArrayList<QuizData> {
             val allWords = dbHelper.getAllWords()
             return ArrayList(
-                WordToQuizDataMapper(
+                WordsToQuizDataMapper(
                     WordProcessor().getProcessedWords(
                         allWords,
                         allWords.size

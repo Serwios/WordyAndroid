@@ -3,7 +3,7 @@ package com.geekglasses.wordy.model
 import android.os.Parcel
 import android.os.Parcelable
 
-data class QuizResultingData(
+data class QuizStatisticData(
     val numberOfGuessedWords: Int,
     val numberOfWords: Int,
     val timeSpentOnQuiz: Long
@@ -25,12 +25,12 @@ data class QuizResultingData(
         return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<QuizResultingData> {
-        override fun createFromParcel(parcel: Parcel): QuizResultingData {
-            return QuizResultingData(parcel)
+    companion object CREATOR : Parcelable.Creator<QuizStatisticData> {
+        override fun createFromParcel(parcel: Parcel): QuizStatisticData {
+            return QuizStatisticData(parcel)
         }
 
-        override fun newArray(size: Int): Array<QuizResultingData?> {
+        override fun newArray(size: Int): Array<QuizStatisticData?> {
             return arrayOfNulls(size)
         }
     }

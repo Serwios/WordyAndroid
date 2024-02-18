@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.widget.Toast
 import com.geekglasses.wordy.entity.Word
-import com.geekglasses.wordy.model.Dictionary
+import com.geekglasses.wordy.entity.Dictionary
 
 class DataBaseHelper(context: Context?) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {

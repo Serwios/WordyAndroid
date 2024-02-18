@@ -12,9 +12,9 @@ import androidx.core.content.ContextCompat
 import com.geekglasses.wordy.MainActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
+import com.geekglasses.wordy.validator.DictionaryValidator
 
 class DictionariesManagementActivity : AppCompatActivity() {
-
     private lateinit var dbHelper: DataBaseHelper
     private lateinit var dictionaryContainer: LinearLayout
 
@@ -33,10 +33,10 @@ class DictionariesManagementActivity : AppCompatActivity() {
             showAddDictionaryDialog()
         }
 
-        populateDictionaryButtons()
+        populateDictionaryTable()
     }
 
-    private fun populateDictionaryButtons() {
+    private fun populateDictionaryTable() {
         val dictionaries = dbHelper.getAllDictionaries()
         val currentPickedDictionary = dbHelper.getCurrentPickedDictionary()
 
@@ -77,7 +77,6 @@ class DictionariesManagementActivity : AppCompatActivity() {
                 }
             }
 
-
             val deleteParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             deleteParams.setMargins(0, 0, 0, 0)
             container.addView(deleteButton, deleteParams)
@@ -97,7 +96,7 @@ class DictionariesManagementActivity : AppCompatActivity() {
 
     private fun refreshDictionaryButtons() {
         dictionaryContainer.removeAllViews()
-        populateDictionaryButtons()
+        populateDictionaryTable()
     }
 
     private fun showAddDictionaryDialog() {
@@ -123,6 +122,10 @@ class DictionariesManagementActivity : AppCompatActivity() {
     }
 
     private fun addNewDictionary(dictionaryName: String) {
+        if (!isDictionaryNameValid(dictionaryName)) {
+            return
+        }
+
         if (dbHelper.addDictionary(dictionaryName)) {
             refreshDictionaryButtons()
         } else {
@@ -130,14 +133,28 @@ class DictionariesManagementActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        fun createIntent(context: Context): Intent {
-            return Intent(context, DictionariesManagementActivity::class.java)
+    private fun isDictionaryNameValid(dictionaryName: String): Boolean {
+        if (DictionaryValidator.isDictionaryExist(dictionaryName, dbHelper)) {
+            Toast.makeText(this, "Dictionary already exist in your repo", Toast.LENGTH_SHORT).show()
+            return false
         }
+
+        if (!DictionaryValidator.isDictionaryValid(dictionaryName)) {
+            Toast.makeText(this, "Dictionary name is invalid", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        return true
     }
 
     private fun navigateToMainActivity() {
         startActivity(MainActivity.createIntent(this))
         finish()
+    }
+
+    companion object {
+        fun createIntent(context: Context): Intent {
+            return Intent(context, DictionariesManagementActivity::class.java)
+        }
     }
 }

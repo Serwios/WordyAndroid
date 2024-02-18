@@ -4,7 +4,7 @@ import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.model.QuizData
 import com.geekglasses.wordy.service.word.OptionsGenerator.generateOptions
 
-class WordToQuizDataMapper(private val words: List<Word>) {
+class WordsToQuizDataMapper(private val words: List<Word>) {
     fun mapToQuizData(): List<QuizData> {
         val quizDataList = mutableListOf<QuizData>()
 
