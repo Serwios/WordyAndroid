@@ -7,14 +7,17 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.R
-import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.model.QuizData
+import com.geekglasses.wordy.db.WordRepository
 
 class QuizActivity : AppCompatActivity() {
+    private lateinit var wordRepository: WordRepository
+
     private lateinit var wordCounterText: TextView
     private lateinit var correctGuessCounter: TextView
     private lateinit var guessedWordText: TextView
     private lateinit var wordButtons: List<Button>
+
     private var currentQuizIndex = 0
     private var totalQuizzes = TOTAL_QUIZZES_DEFAULT_SIZE
     private var correctGuesses = 0
@@ -24,6 +27,8 @@ class QuizActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
+
+        wordRepository = WordRepository(this)
         initViews()
         setUpInitialTexts()
         setUpButtonClickListeners()
@@ -110,8 +115,8 @@ class QuizActivity : AppCompatActivity() {
         }
 
         intent.getStringExtra(CURRENT_WORD)?.let {
-            DataBaseHelper(this).updateStruggleForWord(it, if (isCorrect) -1 else 1)
-            DataBaseHelper(this).updateFreshnessForWord(it, 1)
+            wordRepository.updateStruggleForWord(it, if (isCorrect) -1 else 1)
+            wordRepository.updateFreshnessForWord(it, 1)
         }
 
         if (++currentQuizIndex < totalQuizzes) {

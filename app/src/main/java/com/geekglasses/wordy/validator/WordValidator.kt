@@ -1,13 +1,13 @@
 package com.geekglasses.wordy.validator
 
-import com.geekglasses.wordy.db.DataBaseHelper
+import com.geekglasses.wordy.db.WordRepository
 
 object WordValidator {
     fun isWordValid(word: String?): Boolean {
         return !word.isNullOrBlank()
     }
 
-    fun isWordExist(word: String, dbHelper: DataBaseHelper): Boolean {
-        return dbHelper.isWordExists(word)
+    fun isWordExist(word: String, wordRepo: WordRepository): Boolean {
+        return wordRepo.isWordExists(word)
     }
 }

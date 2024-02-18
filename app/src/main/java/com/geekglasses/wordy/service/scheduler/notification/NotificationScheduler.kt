@@ -15,11 +15,11 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.activity.QuizActivity
-import com.geekglasses.wordy.db.DataBaseHelper
+import com.geekglasses.wordy.db.WordRepository
 import com.geekglasses.wordy.service.quiz.QuizDataResolver
 import java.util.concurrent.TimeUnit
 
-class NotificationScheduler(context: Context, workerParams: WorkerParameters, private val dbHelper: DataBaseHelper) : CoroutineWorker(context, workerParams) {
+class NotificationScheduler(context: Context, workerParams: WorkerParameters, private val wordRepo: WordRepository) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
         sendNotification()
         scheduleNextNotification()
@@ -32,7 +32,7 @@ class NotificationScheduler(context: Context, workerParams: WorkerParameters, pr
         val notificationId = 1
 
         val intent = QuizActivity.createIntent(applicationContext,
-            QuizDataResolver.resolveQuizData(dbHelper), 3
+            QuizDataResolver.resolveQuizData(wordRepo), 3
         )
 
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

@@ -5,24 +5,29 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Space
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.geekglasses.wordy.MainActivity
 import com.geekglasses.wordy.R
-import com.geekglasses.wordy.db.DataBaseHelper
+import com.geekglasses.wordy.db.DictionaryRepository
 import com.geekglasses.wordy.validator.DictionaryValidator
 
 class DictionariesManagementActivity : AppCompatActivity() {
-    private lateinit var dbHelper: DataBaseHelper
+    private lateinit var dictionaryRepo: DictionaryRepository
     private lateinit var dictionaryContainer: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_dictionaries)
 
-        dbHelper = DataBaseHelper(this)
+        dictionaryRepo = DictionaryRepository(this)
         dictionaryContainer = findViewById(R.id.dictionaryContainer)
 
         findViewById<Button>(R.id.backButtonDictionaries).setOnClickListener {
@@ -37,8 +42,8 @@ class DictionariesManagementActivity : AppCompatActivity() {
     }
 
     private fun populateDictionaryTable() {
-        val dictionaries = dbHelper.getAllDictionaries()
-        val currentPickedDictionary = dbHelper.getCurrentPickedDictionary()
+        val dictionaries = dictionaryRepo.getAllDictionaries()
+        val currentPickedDictionary = dictionaryRepo.getCurrentPickedDictionary()
 
         for (dictionary in dictionaries) {
             val container = LinearLayout(this)
@@ -59,7 +64,7 @@ class DictionariesManagementActivity : AppCompatActivity() {
             container.addView(spaceView, spaceParams)
 
             val dictionarySizeTextView = TextView(this)
-            dictionarySizeTextView.text = dbHelper.getDictionarySize(dictionary.name).toString()
+            dictionarySizeTextView.text = dictionaryRepo.getDictionarySize(dictionary.name).toString()
             dictionarySizeTextView.gravity = Gravity.CENTER
             val sizeParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             sizeParams.setMargins(resources.getDimensionPixelSize(R.dimen.dictionary_buttons_margin), 0, resources.getDimensionPixelSize(R.dimen.dictionary_buttons_margin), 0)
@@ -70,7 +75,7 @@ class DictionariesManagementActivity : AppCompatActivity() {
             deleteButton.setTextColor(ContextCompat.getColor(this, android.R.color.black))
             deleteButton.setOnClickListener {
                 if (dictionary.name != currentPickedDictionary) {
-                    dbHelper.deleteDictionary(dictionary.name)
+                    dictionaryRepo.deleteDictionary(dictionary.name)
                     refreshDictionaryButtons()
                 } else {
                     Toast.makeText(this, "Cannot delete the currently picked dictionary", Toast.LENGTH_SHORT).show()
@@ -86,7 +91,7 @@ class DictionariesManagementActivity : AppCompatActivity() {
     }
 
     private fun handleDictionarySelection(dictionaryName: String) {
-        if (dbHelper.pickDictionary(dictionaryName)) {
+        if (dictionaryRepo.pickDictionary(dictionaryName)) {
             Toast.makeText(this, "Picked dictionary: $dictionaryName", Toast.LENGTH_SHORT).show()
             navigateToMainActivity()
         } else {
@@ -126,7 +131,7 @@ class DictionariesManagementActivity : AppCompatActivity() {
             return
         }
 
-        if (dbHelper.addDictionary(dictionaryName)) {
+        if (dictionaryRepo.addDictionary(dictionaryName)) {
             refreshDictionaryButtons()
         } else {
             Toast.makeText(this, "Failed to add dictionary", Toast.LENGTH_SHORT).show()
@@ -134,7 +139,7 @@ class DictionariesManagementActivity : AppCompatActivity() {
     }
 
     private fun isDictionaryNameValid(dictionaryName: String): Boolean {
-        if (DictionaryValidator.isDictionaryExist(dictionaryName, dbHelper)) {
+        if (DictionaryValidator.isDictionaryExist(dictionaryName, dictionaryRepo)) {
             Toast.makeText(this, "Dictionary already exist in your repo", Toast.LENGTH_SHORT).show()
             return false
         }

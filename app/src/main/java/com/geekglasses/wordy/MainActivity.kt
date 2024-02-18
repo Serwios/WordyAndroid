@@ -22,8 +22,9 @@ import com.geekglasses.wordy.activity.DictionariesManagementActivity
 import com.geekglasses.wordy.activity.QuizActivity
 import com.geekglasses.wordy.activity.QuizActivity.Companion.TOTAL_QUIZZES_DEFAULT_SIZE
 import com.geekglasses.wordy.activity.WordsManagementActivity
-import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
+import com.geekglasses.wordy.db.DictionaryRepository
+import com.geekglasses.wordy.db.WordRepository
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
 import com.geekglasses.wordy.service.scheduler.freshness.FreshnessUpdateCheckScheduler
 import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
@@ -40,7 +41,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dictionarySize: TextView
     private lateinit var dictionaryName: TextView
 
-    private val dbHelper by lazy { DataBaseHelper(this) }
+    private val wordRepo by lazy { WordRepository(this) }
+    private val dictionaryRepo by lazy { DictionaryRepository(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,14 +63,14 @@ class MainActivity : AppCompatActivity() {
         dictionarySize = findViewById(R.id.dictionary_size)
         dictionaryName = findViewById(R.id.dictionary_name)
 
-        dictionarySize.text = "Size: ${dbHelper.getWordsForCurrentPickedDictionary()?.size}"
-        dictionaryName.text = "Name: ${dbHelper.getCurrentPickedDictionary()}"
+        dictionarySize.text = "Size: ${dictionaryRepo.getWordsForCurrentPickedDictionary()?.size}"
+        dictionaryName.text = "Name: ${dictionaryRepo.getCurrentPickedDictionary()}"
     }
 
     private fun setupListeners() {
         saveWordButton.setOnClickListener {
             if (isWordValid(wordEditText.text.toString()) && isWordValid(translationEditText.text.toString())) {
-                if (isWordExist(wordEditText.text.toString(), dbHelper)) {
+                if (isWordExist(wordEditText.text.toString(), wordRepo)) {
                     showToast("Input word already exists")
                     return@setOnClickListener
                 }
@@ -88,14 +90,14 @@ class MainActivity : AppCompatActivity() {
             val quizSize = getSharedPreferences("user_pref", Context.MODE_PRIVATE)
                 .getInt("quizSize", TOTAL_QUIZZES_DEFAULT_SIZE)
 
-            val numberOfWordsInDb = dbHelper.getAllWords().size
+            val numberOfWordsInDb = wordRepo.getAllWords().size
 
             if (quizSize > numberOfWordsInDb) {
                 showToast("There are not enough words for a quiz of size $quizSize")
             } else {
                 startActivity(
                     QuizActivity.createIntent(
-                        this, resolveQuizData(dbHelper), quizSize
+                        this, resolveQuizData(wordRepo), quizSize
                     )
                 )
             }
@@ -108,7 +110,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveWord() {
-        dbHelper.addOneWordForPickedDictionary(
+        dictionaryRepo.addOneWordForPickedDictionary(
             Word(
                 wordEditText.text.toString(),
                 translationEditText.text.toString(),
@@ -153,7 +155,7 @@ class MainActivity : AppCompatActivity() {
                     alertDialogBuilder.setMessage("Are you sure you want to clear the dictionary?")
                         .setCancelable(false)
                         .setPositiveButton("Yes") { _, _ ->
-                            dbHelper.clearAllWordsForPickedDictionary()
+                            dictionaryRepo.clearAllWordsForPickedDictionary()
                             showToast("Cleared dictionary")
                             dictionarySize.text = "Size: 0"
                         }
@@ -167,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.show_dictionary -> {
-                    startActivity(dbHelper.getWordsForCurrentPickedDictionary()?.let { ArrayList(it) }
+                    startActivity(dictionaryRepo.getWordsForCurrentPickedDictionary()?.let { ArrayList(it) }
                         ?.let {
                             WordsManagementActivity.createIntent(this,
                                 it
@@ -197,7 +199,7 @@ class MainActivity : AppCompatActivity() {
 
         val dictionaryItem: MenuItem? = menu.findItem(R.id.menu_dictionary)
         if (dictionaryItem != null) {
-            val pickedDictionaryName = dbHelper.getCurrentPickedDictionary()
+            val pickedDictionaryName = dictionaryRepo.getCurrentPickedDictionary()
             dictionaryItem.title = pickedDictionaryName ?: "Dictionary"
         }
 
@@ -217,13 +219,12 @@ class MainActivity : AppCompatActivity() {
             if (inputValue.isNotEmpty()) {
                 val quizSize = inputValue.toInt()
                 if (quizSize > 0) {
-                    if (quizSize > dbHelper.getWordsForCurrentPickedDictionary()?.size!!) {
+                    if (quizSize > dictionaryRepo.getWordsForCurrentPickedDictionary()?.size!!) {
                         showToast("There are not enough words for a quiz of size $quizSize")
                         showSetQuizSizeDialog()
                         return@setPositiveButton
                     }
 
-                    // TODO: Make quiz size different for different dictionary
                     getSharedPreferences("user_pref", Context.MODE_PRIVATE)
                         .edit()
                         .putInt("quizSize", quizSize)

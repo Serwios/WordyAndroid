@@ -7,10 +7,12 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.geekglasses.wordy.R
-import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.model.QuizStatisticData
+import com.geekglasses.wordy.db.WordRepository
 
 class QuizStatisticActivity : AppCompatActivity() {
+    private lateinit var wordRepository: WordRepository
+
     private lateinit var okButton: Button
     private lateinit var numberOfWords: TextView
     private lateinit var numberOfGuessedWords: TextView
@@ -21,6 +23,7 @@ class QuizStatisticActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz_stat)
 
+        wordRepository = WordRepository(this)
         initViews()
         displayQuizStat()
         setButtonClickListeners()
@@ -49,8 +52,7 @@ class QuizStatisticActivity : AppCompatActivity() {
     }
 
     private fun getMostStruggledWord(): String? {
-        val dbHelper = DataBaseHelper(this)
-        return dbHelper.getMostStruggledWord()
+        return wordRepository.getMostStruggledWord()
     }
 
     private fun setButtonClickListeners() {

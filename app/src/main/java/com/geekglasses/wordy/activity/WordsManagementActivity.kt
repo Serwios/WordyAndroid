@@ -16,8 +16,11 @@ import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.model.WordAdapter
+import com.geekglasses.wordy.db.WordRepository
 
 class WordsManagementActivity : AppCompatActivity() {
+    private lateinit var wordRepository: WordRepository
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: WordAdapter
     private lateinit var dbHelper: DataBaseHelper
@@ -26,6 +29,8 @@ class WordsManagementActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_word_list)
+
+        wordRepository = WordRepository(this)
         initViews()
         setUpRecyclerView()
         setUpButtonBack()
@@ -55,10 +60,10 @@ class WordsManagementActivity : AppCompatActivity() {
     fun onDeleteButtonClick(view: View) {
         val wordToDelete = (view.parent as RelativeLayout)
             .findViewById<TextView>(R.id.textViewWritingForm).text.toString().substring(6)
-        if (dbHelper.deleteWordByWritingForm(wordToDelete)) {
+        if (wordRepository.deleteWordByWritingForm(wordToDelete)) {
             Toast.makeText(this, "Successfully deleted", Toast.LENGTH_SHORT).show()
         }
-        wordList = dbHelper.getAllWords()
+        wordList = wordRepository.getAllWords()
         adapter.updateList(wordList)
     }
 
