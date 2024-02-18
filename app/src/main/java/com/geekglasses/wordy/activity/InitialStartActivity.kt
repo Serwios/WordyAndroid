@@ -10,7 +10,7 @@ import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 
 
-class StartActivity : AppCompatActivity() {
+class InitialStartActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)

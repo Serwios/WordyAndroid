@@ -17,16 +17,15 @@ import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.model.WordAdapter
 
-class WordListActivity : AppCompatActivity() {
+class WordsManagementActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: WordAdapter
     private lateinit var dbHelper: DataBaseHelper
-    private var wordList: List<Word> = mutableListOf()
+    private var wordList: List<Word> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_word_list)
-
         initViews()
         setUpRecyclerView()
         setUpButtonBack()
@@ -46,36 +45,28 @@ class WordListActivity : AppCompatActivity() {
 
     private fun setUpButtonBack() {
         findViewById<Button>(R.id.buttonBack).setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            })
             finish()
         }
     }
 
     fun onDeleteButtonClick(view: View) {
-        val parentLayout = view.parent as RelativeLayout
-        val textViewWritingForm = parentLayout.findViewById<TextView>(R.id.textViewWritingForm)
-        val wordToDelete = textViewWritingForm.text.toString().substring(6)
-
+        val wordToDelete = (view.parent as RelativeLayout)
+            .findViewById<TextView>(R.id.textViewWritingForm).text.toString().substring(6)
         if (dbHelper.deleteWordByWritingForm(wordToDelete)) {
             Toast.makeText(this, "Successfully deleted", Toast.LENGTH_SHORT).show()
         }
-
         wordList = dbHelper.getAllWords()
         adapter.updateList(wordList)
     }
 
     companion object {
-        val WORD_LIST_EXTRA = "wordList"
-
-        fun createIntent(
-            context: Context,
-            words: ArrayList<Word>
-        ): Intent {
-            return Intent(context, WordListActivity::class.java).apply {
-                putExtra(WORD_LIST_EXTRA, words)
+        const val WORD_LIST_EXTRA = "wordList"
+        fun createIntent(context: Context, words: ArrayList<Word>) =
+            Intent(context, WordsManagementActivity::class.java).apply {
+                putParcelableArrayListExtra(WORD_LIST_EXTRA, words)
             }
-        }
     }
 }

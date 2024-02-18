@@ -18,10 +18,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.geekglasses.wordy.activity.AllDictionariesActivity
+import com.geekglasses.wordy.activity.DictionariesManagementActivity
 import com.geekglasses.wordy.activity.QuizActivity
 import com.geekglasses.wordy.activity.QuizActivity.Companion.TOTAL_QUIZZES_DEFAULT_SIZE
-import com.geekglasses.wordy.activity.WordListActivity
+import com.geekglasses.wordy.activity.WordsManagementActivity
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
@@ -169,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.show_dictionary -> {
                     startActivity(dbHelper.getWordsForCurrentPickedDictionary()?.let { ArrayList(it) }
                         ?.let {
-                            WordListActivity.createIntent(this,
+                            WordsManagementActivity.createIntent(this,
                                 it
                             )
                         })
@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.dictionaries -> {
-                    startActivity(AllDictionariesActivity.createIntent(this))
+                    startActivity(DictionariesManagementActivity.createIntent(this))
                     true
                 }
 

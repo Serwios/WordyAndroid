@@ -3,26 +3,19 @@ package com.geekglasses.wordy.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.ScrollView
-import android.widget.TableLayout
-import android.widget.TableRow
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.geekglasses.wordy.MainActivity
 import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 
-class AllDictionariesActivity : AppCompatActivity() {
+class DictionariesManagementActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DataBaseHelper
-    private lateinit var scrollView: ScrollView
     private lateinit var dictionaryContainer: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,16 +23,13 @@ class AllDictionariesActivity : AppCompatActivity() {
         setContentView(R.layout.activity_all_dictionaries)
 
         dbHelper = DataBaseHelper(this)
-        scrollView = findViewById(R.id.scrollView)
         dictionaryContainer = findViewById(R.id.dictionaryContainer)
 
-        val backButton: Button = findViewById(R.id.backButtonDictionaries)
-        backButton.setOnClickListener {
-            startActivity(MainActivity.createIntent(this))
+        findViewById<Button>(R.id.backButtonDictionaries).setOnClickListener {
+            navigateToMainActivity()
         }
 
-        val addDictionaryButton: Button = findViewById(R.id.addDictionaryButton)
-        addDictionaryButton.setOnClickListener {
+        findViewById<Button>(R.id.addDictionaryButton).setOnClickListener {
             showAddDictionaryDialog()
         }
 
@@ -51,20 +41,33 @@ class AllDictionariesActivity : AppCompatActivity() {
         val currentPickedDictionary = dbHelper.getCurrentPickedDictionary()
 
         for (dictionary in dictionaries) {
-            val container = RelativeLayout(this)
+            val container = LinearLayout(this)
             container.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            container.orientation = LinearLayout.HORIZONTAL
 
-            val dictionaryButton = Button(this)
-            dictionaryButton.text = dictionary.name
-            dictionaryButton.setOnClickListener {
+            val pickDictionaryButton = Button(this)
+            pickDictionaryButton.text = dictionary.name
+            pickDictionaryButton.setOnClickListener {
                 handleDictionarySelection(dictionary.name)
             }
-            val buttonParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            buttonParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
-            container.addView(dictionaryButton, buttonParams)
+
+            val buttonParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2f)
+            container.addView(pickDictionaryButton, buttonParams)
+
+            val spaceView = Space(this)
+            val spaceParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+            container.addView(spaceView, spaceParams)
+
+            val dictionarySizeTextView = TextView(this)
+            dictionarySizeTextView.text = dbHelper.getDictionarySize(dictionary.name).toString()
+            dictionarySizeTextView.gravity = Gravity.CENTER
+            val sizeParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            sizeParams.setMargins(resources.getDimensionPixelSize(R.dimen.dictionary_buttons_margin), 0, resources.getDimensionPixelSize(R.dimen.dictionary_buttons_margin), 0)
+            container.addView(dictionarySizeTextView, sizeParams)
 
             val deleteButton = Button(this)
             deleteButton.text = "X"
+            deleteButton.setTextColor(ContextCompat.getColor(this, android.R.color.black))
             deleteButton.setOnClickListener {
                 if (dictionary.name != currentPickedDictionary) {
                     dbHelper.deleteDictionary(dictionary.name)
@@ -73,24 +76,20 @@ class AllDictionariesActivity : AppCompatActivity() {
                     Toast.makeText(this, "Cannot delete the currently picked dictionary", Toast.LENGTH_SHORT).show()
                 }
             }
-            val deleteParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            deleteParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-            container.addView(deleteButton, deleteParams)
 
-            val dictionarySizeTextView = TextView(this)
-            dictionarySizeTextView.text = dbHelper.getDictionarySize(dictionary.name).toString()
-            val sizeParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            sizeParams.topMargin = resources.getDimensionPixelSize(R.dimen.text_margin_top)
-            sizeParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
-            container.addView(dictionarySizeTextView, sizeParams)
+
+            val deleteParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            deleteParams.setMargins(0, 0, 0, 0)
+            container.addView(deleteButton, deleteParams)
 
             dictionaryContainer.addView(container)
         }
     }
+
     private fun handleDictionarySelection(dictionaryName: String) {
         if (dbHelper.pickDictionary(dictionaryName)) {
             Toast.makeText(this, "Picked dictionary: $dictionaryName", Toast.LENGTH_SHORT).show()
-            refreshDictionaryButtons()
+            navigateToMainActivity()
         } else {
             Toast.makeText(this, "Failed to pick dictionary", Toast.LENGTH_SHORT).show()
         }
@@ -133,7 +132,12 @@ class AllDictionariesActivity : AppCompatActivity() {
 
     companion object {
         fun createIntent(context: Context): Intent {
-            return Intent(context, AllDictionariesActivity::class.java).apply {}
+            return Intent(context, DictionariesManagementActivity::class.java)
         }
+    }
+
+    private fun navigateToMainActivity() {
+        startActivity(MainActivity.createIntent(this))
+        finish()
     }
 }

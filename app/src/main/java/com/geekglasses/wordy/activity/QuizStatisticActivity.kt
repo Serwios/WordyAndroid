@@ -10,7 +10,7 @@ import com.geekglasses.wordy.R
 import com.geekglasses.wordy.db.DataBaseHelper
 import com.geekglasses.wordy.model.QuizResultingData
 
-class QuizStatActivity : AppCompatActivity() {
+class QuizStatisticActivity : AppCompatActivity() {
     private lateinit var okButton: Button
     private lateinit var numberOfWords: TextView
     private lateinit var numberOfGuessedWords: TextView
@@ -66,7 +66,7 @@ class QuizStatActivity : AppCompatActivity() {
             totalQuizzes: Int,
             timeSpentOnQuiz: Long
         ): Intent {
-            return Intent(context, QuizStatActivity::class.java).apply {
+            return Intent(context, QuizStatisticActivity::class.java).apply {
                 putExtra(
                     QUIZ_STAT_DATA_EXTRA,
                     QuizResultingData(correctGuesses, totalQuizzes, timeSpentOnQuiz)
