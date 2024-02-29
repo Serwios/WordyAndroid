@@ -26,8 +26,6 @@ import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.db.DictionaryRepository
 import com.geekglasses.wordy.db.WordRepository
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
-import com.geekglasses.wordy.service.scheduler.freshness.FreshnessUpdateCheckScheduler
-import com.geekglasses.wordy.service.scheduler.notification.NotificationScheduler
 import com.geekglasses.wordy.validator.WordValidator.isWordExist
 import com.geekglasses.wordy.validator.WordValidator.isWordValid
 import java.util.concurrent.TimeUnit
@@ -50,7 +48,6 @@ class MainActivity : AppCompatActivity() {
 
         initViews()
         setupListeners()
-        scheduleTasks()
     }
 
     private fun initViews() {
@@ -104,11 +101,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun scheduleTasks() {
-        FreshnessUpdateCheckScheduler(this).scheduleFreshnessUpdate()
-        scheduleQuizRequestNotification()
-    }
-
     private fun saveWord() {
         dictionaryRepo.addOneWordForPickedDictionary(
             Word(
@@ -121,18 +113,6 @@ class MainActivity : AppCompatActivity() {
         hideKeyboard()
 
         "Size: ${(dictionarySize.text.split(" ")[1].toInt() + 1)}".also { dictionarySize.text = it }
-    }
-
-    private fun scheduleQuizRequestNotification() {
-        val workRequest = PeriodicWorkRequestBuilder<NotificationScheduler>(
-            1, TimeUnit.DAYS
-        ).build()
-
-        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
-            "QuizNotificationWork",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            workRequest
-        )
     }
 
     private fun clearInputTexts() {
