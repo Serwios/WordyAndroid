@@ -2,6 +2,7 @@ package com.geekglasses.wordy
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
@@ -15,20 +16,19 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.core.content.FileProvider
 import com.geekglasses.wordy.activity.DictionariesManagementActivity
 import com.geekglasses.wordy.activity.QuizActivity
 import com.geekglasses.wordy.activity.QuizActivity.Companion.TOTAL_QUIZZES_DEFAULT_SIZE
 import com.geekglasses.wordy.activity.WordsManagementActivity
-import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.db.DictionaryRepository
 import com.geekglasses.wordy.db.WordRepository
+import com.geekglasses.wordy.entity.Word
 import com.geekglasses.wordy.service.quiz.QuizDataResolver.Companion.resolveQuizData
 import com.geekglasses.wordy.validator.WordValidator.isWordExist
 import com.geekglasses.wordy.validator.WordValidator.isWordValid
-import java.util.concurrent.TimeUnit
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
     private lateinit var wordEditText: EditText
@@ -148,6 +148,23 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
 
+                R.id.share_dictionary -> {
+                    val csvFile = createCsvFromCurrentDictionary()
+                    if (csvFile != null) {
+                        val authority = "com.geekglasses.wordy.fileprovider"
+                        val uri = FileProvider.getUriForFile(this, authority, csvFile)
+                        val shareIntent = Intent(Intent.ACTION_SEND)
+                        shareIntent.type = "text/csv"
+                        shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
+                        shareIntent.setPackage("org.telegram.messenger") // Telegram package
+                        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        startActivity(Intent.createChooser(shareIntent, "Share CSV file"))
+                    } else {
+                        showToast("Failed to share CSV file")
+                    }
+                    true
+                }
+
                 R.id.show_dictionary -> {
                     startActivity(dictionaryRepo.getWordsForCurrentPickedDictionary()?.let { ArrayList(it) }
                         ?.let {
@@ -227,6 +244,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         builder.show()
+    }
+
+    private fun createCsvFromCurrentDictionary(): File? {
+        val words = dictionaryRepo.getWordsForCurrentPickedDictionary() ?: return null
+        val csvContent = StringBuilder()
+        csvContent.append("Word,Translation,Struggle,Freshness\n")
+        words.forEach { word ->
+            csvContent.append("${word.writingForm},${word.translation},${word.struggle},${word.freshness}\n")
+        }
+        return try {
+            val fileName = "dictionary.csv"
+            val file = File(getExternalFilesDir(null), fileName)
+            val outputStream = FileOutputStream(file)
+            outputStream.write(csvContent.toString().toByteArray())
+            outputStream.close()
+            file
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun showToast(message: String) {
